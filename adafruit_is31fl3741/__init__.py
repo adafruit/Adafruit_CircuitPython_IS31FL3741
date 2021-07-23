@@ -185,7 +185,7 @@ class IS31FL3741:
         if not 0 <= y <= self.height:
             return None
         addrs = self.pixel_addrs(x, y)
-        print(addrs)
+        #print(addrs)
         if color is not None:  # set the color
             self[addrs[0]] = (color >> 16) & 0xFF
             self[addrs[1]] = (color >> 8) & 0xFF
