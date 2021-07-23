@@ -131,15 +131,28 @@ class IS31FL3741:
 
 
 
-    def __getitem__(self, key):
-        print(key)
+    def __getitem__(self, led):
+        if not 0 <= led <= 350:
+            raise ValueError("LED must be 0 ~ 350")
+        if led < 180:
+            self.page = 0
+            self._buf[0] = led
+        else:
+            self.page = 1
+            self._buf[0] = led - 180
+
+        with self.i2c_device as i2c:
+            i2c.write_then_readinto(self._buf, self._buf,
+                                    out_start=0, out_end=1,
+                                    in_start=1, in_end=2)
+        return self._buf[1]
 
     def __setitem__(self, led, pwm):
         if not 0 <= led <= 350:
             raise ValueError("LED must be 0 ~ 350")
         if not 0 <= pwm <= 255:
             raise ValueError("PWM must be 0 ~ 255")
-        print(led, pwm)
+        #print(led, pwm)
         
         if led < 180:
             self.page = 0
@@ -150,16 +163,13 @@ class IS31FL3741:
         self._buf[1] = pwm
         with self.i2c_device as i2c:
             i2c.write(self._buf)
-            
-            
-
-
 
     # This function must be replaced for each board
     @staticmethod
-    def pixel_addr(x, y):
+    def pixel_addrs(x, y):
         """Calulate the offset into the device array for x,y pixel"""
-        return x + y * 16
+        raise NotImplementedError("Supported in subclasses only")
+
 
     # pylint: disable-msg=too-many-arguments
     def pixel(self, x, y, color=None):
@@ -174,24 +184,20 @@ class IS31FL3741:
             return None
         if not 0 <= y <= self.height:
             return None
-        pixel = self.pixel_addr(x, y)
-        if color is None and blink is None:
-            return self._register(self._frame, pixel)
-        if frame is None:
-            frame = self._frame
-        if color is not None:
-            if not 0 <= color <= 255:
-                raise ValueError("Color out of range")
-            self._register(frame, _COLOR_OFFSET + pixel, color)
-        if blink is not None:
-            addr, bit = divmod(pixel, 8)
-            bits = self._register(frame, _BLINK_OFFSET + addr)
-            if blink:
-                bits |= 1 << bit
-            else:
-                bits &= ~(1 << bit)
-            self._register(frame, _BLINK_OFFSET + addr, bits)
-        return None
+        addrs = self.pixel_addrs(x, y)
+        print(addrs)
+        if color is not None:  # set the color
+            self[addrs[0]] = (color >> 16) & 0xFF
+            self[addrs[1]] = (color >> 8) & 0xFF
+            self[addrs[2]] = color & 0xFF
+            return None
+        # we want to fetch the color
+        color = self[addrs[0]]
+        color <<= 8
+        color |= self[addrs[1]]
+        color <<= 8
+        color |= self[addrs[2]]
+        return color
 
     # pylint: enable-msg=too-many-arguments
 
@@ -203,8 +209,8 @@ class IS31FL3741:
         :param blink: True to blink
         :param frame: the frame to set the image
         """
-        if img.mode != "L":
-            raise ValueError("Image must be in mode L.")
+        if img.mode != "RGB":
+            raise ValueError("Image must be in mode RGB.")
         imwidth, imheight = img.size
         if imwidth != self.width or imheight != self.height:
             raise ValueError(
@@ -218,4 +224,4 @@ class IS31FL3741:
         # Iterate through the pixels
         for x in range(self.width):  # yes this double loop is slow,
             for y in range(self.height):  #  but these displays are small!
-                self.pixel(x, y, pixels[(x, y)], blink=blink, frame=frame)
+                self.pixel(x, y, pixels[(x, y)])
