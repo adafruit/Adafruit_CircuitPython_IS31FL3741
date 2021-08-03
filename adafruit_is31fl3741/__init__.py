@@ -76,15 +76,20 @@ class IS31FL3741:
         self._page = None
         self.reset()
 
-
     def reset(self):
+        """Reset"""
         self.page = 4
         self._reset_reg = 0xAE
 
     def unlock(self):
+        """Unlock"""
         self._lock_reg = 0xC5
 
     def set_led_scaling(self, scale):
+        """Set LED scaling.
+
+        param scale: The scale.
+        """
         scalebuf = [scale] * 181
         scalebuf[0] = 0
         self.page = 2
@@ -96,40 +101,40 @@ class IS31FL3741:
 
     @property
     def global_current(self):
+        """Global current"""
         self.page = 4
         return self._gcurrent_reg
 
     @global_current.setter
-    def global_current(self, gc):
+    def global_current(self, current):
         self.page = 4
-        self._gcurrent_reg = gc
-        
+        self._gcurrent_reg = current
 
     @property
     def enable(self):
+        """Enable"""
         self.page = 4
         return self._shutdown_bit
 
     @enable.setter
-    def enable(self, en):
+    def enable(self, enable):
         self.page = 4
-        self._shutdown_bit = en
-        
+        self._shutdown_bit = enable
+
     @property
     def page(self):
+        """Page"""
         return self._page
 
     @page.setter
-    def page(self, p):
-        if p == self._page:
+    def page(self, page_value):
+        if page_value == self._page:
             return  # already set
-        if p > 4:
+        if page_value > 4:
             raise ValueError("Page must be 0 ~ 4")
-        self._page = p  # cache
+        self._page = page_value  # cache
         self.unlock()
-        self._page_reg = p
-
-
+        self._page_reg = page_value
 
     def __getitem__(self, led):
         if not 0 <= led <= 350:
@@ -142,9 +147,9 @@ class IS31FL3741:
             self._buf[0] = led - 180
 
         with self.i2c_device as i2c:
-            i2c.write_then_readinto(self._buf, self._buf,
-                                    out_start=0, out_end=1,
-                                    in_start=1, in_end=2)
+            i2c.write_then_readinto(
+                self._buf, self._buf, out_start=0, out_end=1, in_start=1, in_end=2
+            )
         return self._buf[1]
 
     def __setitem__(self, led, pwm):
@@ -152,8 +157,8 @@ class IS31FL3741:
             raise ValueError("LED must be 0 ~ 350")
         if not 0 <= pwm <= 255:
             raise ValueError("PWM must be 0 ~ 255")
-        #print(led, pwm)
-        
+        # print(led, pwm)
+
         if led < 180:
             self.page = 0
             self._buf[0] = led
@@ -170,7 +175,6 @@ class IS31FL3741:
         """Calulate the offset into the device array for x,y pixel"""
         raise NotImplementedError("Supported in subclasses only")
 
-
     # pylint: disable-msg=too-many-arguments
     def pixel(self, x, y, color=None):
         """
@@ -185,7 +189,7 @@ class IS31FL3741:
         if not 0 <= y <= self.height:
             return None
         addrs = self.pixel_addrs(x, y)
-        #print(addrs)
+        # print(addrs)
         if color is not None:  # set the color
             self[addrs[0]] = (color >> 16) & 0xFF
             self[addrs[1]] = (color >> 8) & 0xFF
@@ -201,13 +205,11 @@ class IS31FL3741:
 
     # pylint: enable-msg=too-many-arguments
 
-    def image(self, img, blink=None, frame=None):
+    def image(self, img):
         """Set buffer to value of Python Imaging Library image.  The image should
         be in 8-bit mode (L) and a size equal to the display size.
 
         :param img: Python Imaging Library image
-        :param blink: True to blink
-        :param frame: the frame to set the image
         """
         if img.mode != "RGB":
             raise ValueError("Image must be in mode RGB.")
