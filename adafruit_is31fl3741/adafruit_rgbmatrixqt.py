@@ -47,16 +47,16 @@ class Adafruit_RGBMatrixQT(IS31FL3741):
 
         if row <= 5:
             if col < 10:
-                offset = 0x1E*row + col*3
+                offset = 0x1E * row + col * 3
             else:
-                offset = 0xB4 + 0x5A + 9*row + (col - 10)*3
+                offset = 0xB4 + 0x5A + 9 * row + (col - 10) * 3
         else:
             if col < 10:
-                offset = 0xB4 + (row-6)*0x1E + col*3
+                offset = 0xB4 + (row - 6) * 0x1E + col * 3
             else:
-                offset = 0xB4 + 0x5A + 9*row + (col - 10)*3
-            
-        #print(x, ",", y, "->", hex(offset))
+                offset = 0xB4 + 0x5A + 9 * row + (col - 10) * 3
+
+        # print(x, ",", y, "->", hex(offset))
         r_off = 0
         g_off = 1
         b_off = 2
@@ -64,9 +64,9 @@ class Adafruit_RGBMatrixQT(IS31FL3741):
             r_off = 2
             g_off = 1
             b_off = 0
-        else: # evens
+        else:  # evens
             r_off = 0
             g_off = 2
             b_off = 1
-            
-        return (offset+r_off, offset+g_off, offset+b_off)
+
+        return (offset + r_off, offset + g_off, offset + b_off)

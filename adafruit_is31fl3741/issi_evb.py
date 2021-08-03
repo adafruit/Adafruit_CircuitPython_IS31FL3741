@@ -44,4 +44,4 @@ class ISSI_EVB(IS31FL3741):
         else:
             offset = (x + y * 10) * 3
 
-        return (offset+2, offset+1, offset)
+        return (offset + 2, offset + 1, offset)
