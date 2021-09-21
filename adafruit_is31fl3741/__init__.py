@@ -24,7 +24,7 @@ Implementation Notes
 
 """
 
-import adafruit_bus_device.i2c_device as i2c_device
+from adafruit_bus_device import i2c_device
 from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
 
@@ -43,6 +43,11 @@ _IS3741_FUNCREG_CONFIG = 0x00
 _IS3741_FUNCREG_GCURRENT = 0x01
 _IS3741_FUNCREG_RESET = 0x3F
 
+# Buffer allocation behaviors passed to constructor
+NO_BUFFER = 0x00     # DO NOT buffer pixel data, write pixels as needed
+PREFER_BUFFER = 0x01 # OPTIONALLY buffer pixel data, RAM permitting
+MUST_BUFFER = 0x02   # MUST buffer pixel data, else throw MemoryError
+
 
 class IS31FL3741:
     """
@@ -59,11 +64,6 @@ class IS31FL3741:
                      MemoryError if allocation fails.
     """
 
-    # Buffer allocation behaviors passed to constructor
-    NO_BUFFER = 0x00     # DO NOT buffer pixel data, write pixels as needed
-    PREFER_BUFFER = 0x01 # OPTIONALLY buffer pixel data, RAM permitting
-    MUST_BUFFER = 0x02   # MUST buffer pixel data, else throw MemoryError
-
     width = 13
     height = 9
 
@@ -77,11 +77,15 @@ class IS31FL3741:
     _pixel_buffer = None
 
     def __init__(self, i2c, address=_IS3741_ADDR_DEFAULT, allocate=NO_BUFFER):
-        if allocate >= IS31FL3741.PREFER_BUFFER:
+        if allocate >= PREFER_BUFFER:
             try:
-                self._pixel_buffer = bytearray(351)
+                # Pixel buffer intentionally has an extra item at the start
+                # (value of 0) so we can i2c.write() from the buffer directly
+                # (don't need a temp/copy buffer to pre-pend the register
+                # address).
+                self._pixel_buffer = bytearray(352)
             except MemoryError:
-                if allocate == IS31FL3741.MUST_BUFFER:
+                if allocate == MUST_BUFFER:
                     raise
         self.i2c_device = i2c_device.I2CDevice(i2c, address)
         if self._id_reg != 2 * address:
@@ -154,20 +158,19 @@ class IS31FL3741:
         if not 0 <= led <= 350:
             raise ValueError("LED must be 0 ~ 350")
         if self._pixel_buffer:
-            return self._pixel_buffer[led]
+            return self._pixel_buffer[1 + led]
+        if led < 180:
+            self.page = 0
+            self._buf[0] = led
         else:
-            if led < 180:
-                self.page = 0
-                self._buf[0] = led
-            else:
-                self.page = 1
-                self._buf[0] = led - 180
+            self.page = 1
+            self._buf[0] = led - 180
 
-            with self.i2c_device as i2c:
-                i2c.write_then_readinto(
-                    self._buf, self._buf, out_start=0, out_end=1, in_start=1, in_end=2
-                )
-            return self._buf[1]
+        with self.i2c_device as i2c:
+            i2c.write_then_readinto(
+                self._buf, self._buf, out_start=0, out_end=1, in_start=1, in_end=2
+            )
+        return self._buf[1]
 
     def __setitem__(self, led, pwm):
         if not 0 <= led <= 350:
@@ -176,7 +179,7 @@ class IS31FL3741:
             raise ValueError("PWM must be 0 ~ 255")
         # print(led, pwm)
         if self._pixel_buffer:
-            self._pixel_buffer[led] = pwm;
+            self._pixel_buffer[1 + led] = pwm
         else:
             if led < 180:
                 self.page = 0
@@ -254,7 +257,17 @@ class IS31FL3741:
         if self._pixel_buffer:
             self.page = 0
             with self.i2c_device as i2c:
-                i2c.write(self._pixel_buffer, start=0, end=180)
+                # _pixel_buffer[0] is always 0! (First register addr)
+                i2c.write(self._pixel_buffer, start=0, end=181)
             self.page = 1
             with self.i2c_device as i2c:
+                # In order to write from pixel buffer directly (without a
+                # whole extra temp buffer), element 180 is saved in a temp var
+                # and replaced with 0 (representing the first regisyer addr on
+                # page 1), then we can i2c.write() directly from that position
+                # in the buffer. Element 180 is restored afterward. This is
+                # the same strategy as used in the Arduino library.
+                save = self._pixel_buffer[180]
+                self._pixel_buffer[180] = 0
                 i2c.write(self._pixel_buffer, start=180, end=351)
+                self._pixel_buffer[180] = save

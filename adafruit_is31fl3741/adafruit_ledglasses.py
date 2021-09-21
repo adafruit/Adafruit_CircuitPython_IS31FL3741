@@ -23,6 +23,7 @@ Implementation Notes
 
 """
 # pylint: disable=abstract-method, super-init-not-called
+import adafruit_is31fl3741
 from . import IS31FL3741
 
 
@@ -113,7 +114,7 @@ class Left_Ring:
 class LED_Glasses(IS31FL3741):
     """Class representing LED Glasses"""
 
-    def __init__(self, i2c, allocate=IS31FL3741.NO_BUFFER):
+    def __init__(self, i2c, allocate=adafruit_is31fl3741.NO_BUFFER):
         super().__init__(i2c, allocate=allocate)
         self.set_led_scaling(0xFF)  # turn on LEDs all the way
         self.global_current = 0xFE  # set current to max
