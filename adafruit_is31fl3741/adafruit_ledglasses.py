@@ -90,7 +90,7 @@ class Right_Ring:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
 
-        rgb = unpack_from(">HHH", Right_Ring.ledmap_bytes, led * 6)
+        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
         self._is31[rgb[0]] = (color >> 16) & 0xFF
         self._is31[rgb[1]] = (color >> 8) & 0xFF
         self._is31[rgb[2]] = color & 0xFF
@@ -98,7 +98,7 @@ class Right_Ring:
     def __getitem__(self, led):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
-        rgb = Right_Ring.ledmap[led]
+        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
         return (
             (self._is31[rgb[0]] << 16) | (self._is31[rgb[1]] << 8) | self._is31[rgb[2]]
         )
@@ -167,7 +167,7 @@ class Left_Ring:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
 
-        rgb = unpack_from(">HHH", Left_Ring.ledmap_bytes, led * 6)
+        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
         self._is31[rgb[0]] = (color >> 16) & 0xFF
         self._is31[rgb[1]] = (color >> 8) & 0xFF
         self._is31[rgb[2]] = color & 0xFF
@@ -175,7 +175,7 @@ class Left_Ring:
     def __getitem__(self, led):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
-        rgb = Left_Ring.ledmap[led]
+        rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
         return (
             (self._is31[rgb[0]] << 16) | (self._is31[rgb[1]] << 8) | self._is31[rgb[2]]
         )
