@@ -153,18 +153,21 @@ class IS31FL3741:
     def __getitem__(self, led):
         if not 0 <= led <= 350:
             raise ValueError("LED must be 0 ~ 350")
-        if led < 180:
-            self.page = 0
-            self._buf[0] = led
+        if self._pixel_buffer:
+            return self._pixel_buffer[led]
         else:
-            self.page = 1
-            self._buf[0] = led - 180
+            if led < 180:
+                self.page = 0
+                self._buf[0] = led
+            else:
+                self.page = 1
+                self._buf[0] = led - 180
 
-        with self.i2c_device as i2c:
-            i2c.write_then_readinto(
-                self._buf, self._buf, out_start=0, out_end=1, in_start=1, in_end=2
-            )
-        return self._buf[1]
+            with self.i2c_device as i2c:
+                i2c.write_then_readinto(
+                    self._buf, self._buf, out_start=0, out_end=1, in_start=1, in_end=2
+                )
+            return self._buf[1]
 
     def __setitem__(self, led, pwm):
         if not 0 <= led <= 350:
@@ -172,16 +175,18 @@ class IS31FL3741:
         if not 0 <= pwm <= 255:
             raise ValueError("PWM must be 0 ~ 255")
         # print(led, pwm)
-
-        if led < 180:
-            self.page = 0
-            self._buf[0] = led
+        if self._pixel_buffer:
+            self._pixel_buffer[led] = pwm;
         else:
-            self.page = 1
-            self._buf[0] = led - 180
-        self._buf[1] = pwm
-        with self.i2c_device as i2c:
-            i2c.write(self._buf)
+            if led < 180:
+                self.page = 0
+                self._buf[0] = led
+            else:
+                self.page = 1
+                self._buf[0] = led - 180
+            self._buf[1] = pwm
+            with self.i2c_device as i2c:
+                i2c.write(self._buf)
 
     # This function must be replaced for each board
     @staticmethod
@@ -242,13 +247,14 @@ class IS31FL3741:
             for y in range(self.height):  #  but these displays are small!
                 self.pixel(x, y, pixels[(x, y)])
 
-    def write(self):
+    def show(self):
         """Issue in-RAM pixel data to device. No effect if pixels are
            unbuffered.
         """
-        if self.pixel_buffer:
+        if self._pixel_buffer:
+            self.page = 0
             with self.i2c_device as i2c:
-                self.page = 0
-                i2c.write(self.pixel_buffer[0:180])
-                self.page = 1
-                i2c.write(self.pixel_buffer[180:351])
+                i2c.write(self._pixel_buffer, start=0, end=180)
+            self.page = 1
+            with self.i2c_device as i2c:
+                i2c.write(self._pixel_buffer, start=180, end=351)
