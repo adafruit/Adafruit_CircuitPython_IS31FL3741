@@ -44,9 +44,9 @@ _IS3741_FUNCREG_GCURRENT = 0x01
 _IS3741_FUNCREG_RESET = 0x3F
 
 # Buffer allocation behaviors passed to constructor
-NO_BUFFER = 0x00     # DO NOT buffer pixel data, write pixels as needed
-PREFER_BUFFER = 0x01 # OPTIONALLY buffer pixel data, RAM permitting
-MUST_BUFFER = 0x02   # MUST buffer pixel data, else throw MemoryError
+NO_BUFFER = 0x00  # DO NOT buffer pixel data, write pixels as needed
+PREFER_BUFFER = 0x01  # OPTIONALLY buffer pixel data, RAM permitting
+MUST_BUFFER = 0x02  # MUST buffer pixel data, else throw MemoryError
 
 
 class IS31FL3741:
