@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Tony DiCola 2017 for Adafruit Industries
+# SPDX-FileCopyrightText: Tony DiCola 2017 for Adafruit Industries, Rose Hooper
 #
 # SPDX-License-Identifier: MIT
 
@@ -9,7 +9,7 @@
 CircuitPython driver for the Adafruit IS31FL3741 RGB Matrix QT board
 
 
-* Author(s): ladyada
+* Author(s): ladyada, Rose Hooper
 
 Implementation Notes
 --------------------
@@ -22,11 +22,10 @@ Implementation Notes
   https://github.com/adafruit/circuitpython/releases
 
 """
-# pylint: disable=abstract-method, super-init-not-called
 from . import IS31FL3741
 
 
-class Right_Ring(IS31FL3741):
+class Right_Ring:
     """The right eye ring of the LED glasses"""
 
     def __init__(self, is31_controller):
@@ -207,6 +206,7 @@ class LED_Glasses(IS31FL3741):
     ]
     width = 18
     height = 5
+    # These pixels aren't connected to anything and are safe to use for pixels that aren't visible
     unused_pixels = (120, 121, 314)
 
     def __init__(self, i2c):
