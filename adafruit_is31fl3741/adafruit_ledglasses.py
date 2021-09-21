@@ -22,9 +22,9 @@ Implementation Notes
   https://github.com/adafruit/circuitpython/releases
 
 """
+from struct import unpack_from
 import adafruit_is31fl3741
 from . import IS31FL3741
-from struct import unpack_from
 
 
 class Right_Ring:
