@@ -252,7 +252,7 @@ class IS31FL3741:
 
     def show(self):
         """Issue in-RAM pixel data to device. No effect if pixels are
-           unbuffered.
+        unbuffered.
         """
         if self._pixel_buffer:
             self.page = 0
