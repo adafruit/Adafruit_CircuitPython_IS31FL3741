@@ -267,7 +267,9 @@ class IS31FL3741:
                 # page 1), then we can i2c.write() directly from that position
                 # in the buffer. Element 180 is restored afterward. This is
                 # the same strategy as used in the Arduino library.
+                # 'end' below is 352 (not 351) because of the extra byte at
+                # the start of the pixel buffer.
                 save = self._pixel_buffer[180]
                 self._pixel_buffer[180] = 0
-                i2c.write(self._pixel_buffer, start=180, end=351)
+                i2c.write(self._pixel_buffer, start=180, end=352)
                 self._pixel_buffer[180] = save
