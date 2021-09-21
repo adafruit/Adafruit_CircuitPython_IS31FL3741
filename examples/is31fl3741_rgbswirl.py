@@ -5,8 +5,9 @@ import board
 from rainbowio import colorwheel
 
 from adafruit_is31fl3741.adafruit_rgbmatrixqt import Adafruit_RGBMatrixQT
+import adafruit_is31fl3741
 
-is31 = Adafruit_RGBMatrixQT(board.I2C())
+is31 = Adafruit_RGBMatrixQT(board.I2C(), allocate=adafruit_is31fl3741.PREFER_BUFFER)
 is31.set_led_scaling(0xFF)
 is31.global_current = 0xFF
 # print("Global current is: ", is31.global_current)
@@ -19,3 +20,4 @@ while True:
         for x in range(13):
             is31.pixel(x, y, colorwheel((y * 13 + x) * 2 + wheeloffset))
     wheeloffset += 1
+    is31.show()
