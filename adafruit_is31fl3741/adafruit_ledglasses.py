@@ -113,8 +113,8 @@ class Left_Ring:
 class LED_Glasses(IS31FL3741):
     """Class representing LED Glasses"""
 
-    def __init__(self, i2c):
-        super().__init__(i2c)
+    def __init__(self, i2c, allocate=IS31FL3741.NO_BUFFER):
+        super().__init__(i2c, allocate=allocate)
         self.set_led_scaling(0xFF)  # turn on LEDs all the way
         self.global_current = 0xFE  # set current to max
         self.enable = True  # enable!

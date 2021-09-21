@@ -51,7 +51,18 @@ class IS31FL3741:
 
     :param ~adafruit_bus_device.i2c_device i2c_device: the connected i2c bus i2c_device
     :param address: the device address; defaults to 0x30
+    :param allocate: buffer allocation strategy: NO_BUFFER = pixels are always
+                     sent to device as they're set. PREFER_BUFFER = RAM
+                     permitting, buffer pixels in RAM, updating device only
+                     when show() is called, but fall back on NO_BUFFER
+                     behavior. MUST_BUFFER = buffer pixels in RAM, throw
+                     MemoryError if allocation fails.
     """
+
+    # Buffer allocation behaviors passed to constructor
+    NO_BUFFER = 0x00     # DO NOT buffer pixel data, write pixels as needed
+    PREFER_BUFFER = 0x01 # OPTIONALLY buffer pixel data, RAM permitting
+    MUST_BUFFER = 0x02   # MUST buffer pixel data, else throw MemoryError
 
     width = 13
     height = 9
@@ -63,8 +74,15 @@ class IS31FL3741:
     _gcurrent_reg = UnaryStruct(_IS3741_FUNCREG_GCURRENT, "<B")
     _reset_reg = UnaryStruct(_IS3741_FUNCREG_RESET, "<B")
     _shutdown_bit = RWBit(_IS3741_FUNCREG_CONFIG, 0)
+    _pixel_buffer = None
 
-    def __init__(self, i2c, address=_IS3741_ADDR_DEFAULT):
+    def __init__(self, i2c, address=_IS3741_ADDR_DEFAULT, allocate=NO_BUFFER):
+        if allocate >= IS31FL3741.PREFER_BUFFER:
+            try:
+                self._pixel_buffer = bytearray(351)
+            except MemoryError:
+                if allocate == IS31FL3741.MUST_BUFFER:
+                    raise
         self.i2c_device = i2c_device.I2CDevice(i2c, address)
         if self._id_reg != 2 * address:
             raise AttributeError("Cannot find a IS31FL3741 at address 0x", address)
@@ -223,3 +241,14 @@ class IS31FL3741:
         for x in range(self.width):  # yes this double loop is slow,
             for y in range(self.height):  #  but these displays are small!
                 self.pixel(x, y, pixels[(x, y)])
+
+    def write(self):
+        """Issue in-RAM pixel data to device. No effect if pixels are
+           unbuffered.
+        """
+        if self.pixel_buffer:
+            with self.i2c_device as i2c:
+                self.page = 0
+                i2c.write(self.pixel_buffer[0:180])
+                self.page = 1
+                i2c.write(self.pixel_buffer[180:351])
