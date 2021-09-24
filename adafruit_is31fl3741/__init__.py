@@ -204,26 +204,19 @@ class IS31FL3741:
 
         :param x: horizontal pixel position
         :param y: vertical pixel position
-        :param color: hex color value 0x000000 to 0xFFFFFF
+        :param color: hex color value 0x000000 to 0xFFFFFF to set,
+                      or None to return current pixel value
         """
-        if not 0 <= x <= self.width:
-            return None
-        if not 0 <= y <= self.height:
-            return None
-        addrs = self.pixel_addrs(x, y)
-        # print(addrs)
-        if color is not None:  # set the color
+
+        if 0 <= x < self.width and 0 <= y < self.height:  # Clip
+            addrs = self.pixel_addrs(x, y)  # LED indices
+            # print(addrs)
+            if color is None:  # Return current pixel color if unspecified
+                return (self[addrs[0]] << 16) | (self[addrs[1]] << 8) | self[addrs[2]]
             self[addrs[0]] = (color >> 16) & 0xFF
             self[addrs[1]] = (color >> 8) & 0xFF
             self[addrs[2]] = color & 0xFF
-            return None
-        # we want to fetch the color
-        color = self[addrs[0]]
-        color <<= 8
-        color |= self[addrs[1]]
-        color <<= 8
-        color |= self[addrs[2]]
-        return color
+        return None
 
     # pylint: enable-msg=too-many-arguments
 
