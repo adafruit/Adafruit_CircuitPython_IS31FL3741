@@ -208,7 +208,7 @@ class IS31FL3741:
                       or None to return current pixel value
         """
 
-        if 0 <= x < self.width and 0 <= y <= self.height:  # Clip
+        if 0 <= x < self.width and 0 <= y < self.height:  # Clip
             addrs = self.pixel_addrs(x, y)  # LED indices
             # print(addrs)
             if color is None:  # Return current pixel color if unspecified
