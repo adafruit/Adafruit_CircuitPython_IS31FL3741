@@ -86,25 +86,43 @@ class Right_Ring:
         b"\x00\x3C\x00\x3D\x01\x28"
     )
 
-    def __init__(self, is31_controller):
+    def __init__(self, is31_controller, order):
         self._is31 = is31_controller
+        self.r_offset = (order >> 4) & 3
+        self.g_offset = (order >> 2) & 3
+        self.b_offset = order & 3
 
     def __setitem__(self, led, color):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
 
         rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
-        self._is31[rgb[0]] = (color >> 16) & 0xFF
-        self._is31[rgb[1]] = (color >> 8) & 0xFF
-        self._is31[rgb[2]] = color & 0xFF
+        self._is31[rgb[self.r_offset]] = (color >> 16) & 0xFF
+        self._is31[rgb[self.g_offset]] = (color >> 8) & 0xFF
+        self._is31[rgb[self.b_offset]] = color & 0xFF
 
     def __getitem__(self, led):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
         return (
-            (self._is31[rgb[0]] << 16) | (self._is31[rgb[1]] << 8) | self._is31[rgb[2]]
+            (self._is31[rgb[self.r_offset]] << 16)
+            | (self._is31[rgb[self.g_offset]] << 8)
+            | self._is31[rgb[self.b_offset]]
         )
+
+    def fill(self, color):
+        """Sets all LEDs in a ring to the same color.
+        :param color: Packed RGB color (0xRRGGBB).
+        """
+        red = (color >> 16) & 0xFF
+        green = (color >> 8) & 0xFF
+        blue = color & 0xFF
+        for x in range(24):
+            offset = unpack_from(">HHH", self.ledmap_bytes, x * 6)
+            self._is31[offset[self.r_offset]] = red
+            self._is31[offset[self.g_offset]] = green
+            self._is31[offset[self.b_offset]] = blue
 
 
 class Left_Ring:
@@ -163,25 +181,43 @@ class Left_Ring:
         b"\x00\xF0\x00\xF1\x01\x5E"
     )
 
-    def __init__(self, is31_controller):
+    def __init__(self, is31_controller, order):
         self._is31 = is31_controller
+        self.r_offset = (order >> 4) & 3
+        self.g_offset = (order >> 2) & 3
+        self.b_offset = order & 3
 
     def __setitem__(self, led, color):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
 
         rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
-        self._is31[rgb[0]] = (color >> 16) & 0xFF
-        self._is31[rgb[1]] = (color >> 8) & 0xFF
-        self._is31[rgb[2]] = color & 0xFF
+        self._is31[rgb[self.r_offset]] = (color >> 16) & 0xFF
+        self._is31[rgb[self.g_offset]] = (color >> 8) & 0xFF
+        self._is31[rgb[self.b_offset]] = color & 0xFF
 
     def __getitem__(self, led):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
         return (
-            (self._is31[rgb[0]] << 16) | (self._is31[rgb[1]] << 8) | self._is31[rgb[2]]
+            (self._is31[rgb[self.r_offset]] << 16)
+            | (self._is31[rgb[self.g_offset]] << 8)
+            | self._is31[rgb[self.b_offset]]
         )
+
+    def fill(self, color):
+        """Sets all LEDs in a ring to the same color.
+        :param color: Packed RGB color (0xRRGGBB).
+        """
+        red = (color >> 16) & 0xFF
+        green = (color >> 8) & 0xFF
+        blue = color & 0xFF
+        for x in range(24):
+            offset = unpack_from(">HHH", self.ledmap_bytes, x * 6)
+            self._is31[offset[self.r_offset]] = red
+            self._is31[offset[self.g_offset]] = green
+            self._is31[offset[self.b_offset]] = blue
 
 
 class LED_Glasses(IS31FL3741_colorXY):
@@ -384,8 +420,8 @@ class LED_Glasses(IS31FL3741_colorXY):
         self.global_current = 0xFE  # set current to max
         self.enable = True  # enable!
 
-        self.right_ring = Right_Ring(self)
-        self.left_ring = Left_Ring(self)
+        self.right_ring = Right_Ring(self, order)
+        self.left_ring = Left_Ring(self, order)
         self.grid = self
 
     @staticmethod
