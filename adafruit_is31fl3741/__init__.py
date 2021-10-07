@@ -24,6 +24,7 @@ Implementation Notes
 
 """
 
+from sys import implementation
 from adafruit_bus_device import i2c_device
 from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
@@ -316,22 +317,28 @@ class IS31FL3741_colorXY(IS31FL3741):
         return None
 
     def image(self, img):
-        """Set buffer to value of Python Imaging Library image.
-        The image should be in 24-bit color mode (RGB) and a size equal to
-        the display size.
-        :param img: Python Imaging Library image
+        """Copy an in-memory image to the LED matrix. Image should be in
+        24-bit format (e.g. "RGB888") and dimensions should match matrix,
+        this isn't super robust yet or anything.
+        :param img: Source image -- either a FrameBuffer object if running
+        CircuitPython, or PIL image if running CPython w/Python Imaging Lib.
         """
-        if img.mode != "RGB":
-            raise ValueError("Image must be in mode RGB.")
-        if img.size[0] != self.width or img.size[1] != self.height:
-            raise ValueError(
-                "Image must be same dimensions as display ({0}x{1}).".format(
-                    self.width, self.height
+        if implementation.name == "circuitpython":
+            for y in range(self.height):
+                for x in range(self.width):
+                    self.pixel(x, y, img.pixel(x, y))
+        else:
+            if img.mode != "RGB":
+                raise ValueError("Image must be in mode RGB.")
+            if img.size[0] != self.width or img.size[1] != self.height:
+                raise ValueError(
+                    "Image must be same dimensions as display ({0}x{1}).".format(
+                        self.width, self.height
+                    )
                 )
-            )
 
-        # Iterate X/Y through all image pixels
-        pixels = img.load()  # Grab all pixels, faster than getpixel on each
-        for y in range(self.height):
-            for x in range(self.width):
-                self.pixel(x, y, pixels[(x, y)])
+            # Iterate X/Y through all image pixels
+            pixels = img.load()  # Grab all pixels, faster than getpixel on each
+            for y in range(self.height):
+                for x in range(self.width):
+                    self.pixel(x, y, pixels[(x, y)])
