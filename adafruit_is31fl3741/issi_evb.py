@@ -29,6 +29,12 @@ Implementation Notes
 # imports
 from . import IS31FL3741
 
+try:
+    # Used only for typing
+    from typing import Tuple  # pylint: disable=unused-import
+except ImportError:
+    pass
+
 
 class ISSI_EVB(IS31FL3741):
     """Supports the ISSI IS31FL3741 eval board"""
@@ -37,7 +43,7 @@ class ISSI_EVB(IS31FL3741):
     height = 9
 
     @staticmethod
-    def pixel_addrs(x: int, y: int):
+    def pixel_addrs(x: int, y: int) -> Tuple[int, int, int]:
         """Calulate the RGB offsets into the device array for x,y pixel"""
         if x > 9:
             offset = (x + 80 + y * 3) * 3

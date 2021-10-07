@@ -30,7 +30,8 @@ from adafruit_register.i2c_bit import RWBit
 import busio
 
 try:
-    from typing import Optional
+    # Used only for typing
+    from typing import Optional, Tuple, Union  # pylint: disable=unused-import
     from PIL import Image
 except ImportError:
     pass
@@ -106,16 +107,16 @@ class IS31FL3741:
         self._page = None
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset"""
         self.page = 4
         self._reset_reg = 0xAE
 
-    def unlock(self):
+    def unlock(self) -> None:
         """Unlock"""
         self._lock_reg = 0xC5
 
-    def set_led_scaling(self, scale: int):
+    def set_led_scaling(self, scale: int) -> None:
         """Set LED scaling.
 
         param scale: The scale.
@@ -130,34 +131,34 @@ class IS31FL3741:
             i2c.write(bytes(scalebuf))
 
     @property
-    def global_current(self):
+    def global_current(self) -> int:
         """Global current"""
         self.page = 4
         return self._gcurrent_reg
 
     @global_current.setter
-    def global_current(self, current: int):
+    def global_current(self, current: int) -> None:
         self.page = 4
         self._gcurrent_reg = current
 
     @property
-    def enable(self):
+    def enable(self) -> bool:
         """Enable"""
         self.page = 4
         return self._shutdown_bit
 
     @enable.setter
-    def enable(self, enable: bool):
+    def enable(self, enable: bool) -> None:
         self.page = 4
         self._shutdown_bit = enable
 
     @property
-    def page(self):
+    def page(self) -> Union[int, None]:
         """Page"""
         return self._page
 
     @page.setter
-    def page(self, page_value: int):
+    def page(self, page_value: int) -> None:
         if page_value == self._page:
             return  # already set
         if page_value > 4:
@@ -166,7 +167,7 @@ class IS31FL3741:
         self.unlock()
         self._page_reg = page_value
 
-    def __getitem__(self, led: int):
+    def __getitem__(self, led: int) -> int:
         if not 0 <= led <= 350:
             raise ValueError("LED must be 0 ~ 350")
         if self._pixel_buffer:
@@ -184,7 +185,7 @@ class IS31FL3741:
             )
         return self._buf[1]
 
-    def __setitem__(self, led: int, pwm: int):
+    def __setitem__(self, led: int, pwm: int) -> None:
         if not 0 <= led <= 350:
             raise ValueError("LED must be 0 ~ 350")
         if not 0 <= pwm <= 255:
@@ -205,12 +206,12 @@ class IS31FL3741:
 
     # This function must be replaced for each board
     @staticmethod
-    def pixel_addrs(x: int, y: int):
+    def pixel_addrs(x: int, y: int) -> Tuple[int, ...]:
         """Calulate the offset into the device array for x,y pixel"""
         raise NotImplementedError("Supported in subclasses only")
 
     # pylint: disable-msg=too-many-arguments
-    def pixel(self, x: int, y: int, color: Optional[int] = None):
+    def pixel(self, x: int, y: int, color: Optional[int] = None) -> Union[int, None]:
         """
         Color of for x-, y-pixel
 
@@ -232,7 +233,7 @@ class IS31FL3741:
 
     # pylint: enable-msg=too-many-arguments
 
-    def image(self, img: Image):
+    def image(self, img: Image) -> None:
         """Set buffer to value of Python Imaging Library image.  The image should
         be in 8-bit mode (L) and a size equal to the display size.
 
@@ -255,7 +256,7 @@ class IS31FL3741:
             for y in range(self.height):  #  but these displays are small!
                 self.pixel(x, y, pixels[(x, y)])
 
-    def show(self):
+    def show(self) -> None:
         """Issue in-RAM pixel data to device. No effect if pixels are
         unbuffered.
         """

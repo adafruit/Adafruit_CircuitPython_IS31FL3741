@@ -23,9 +23,15 @@ Implementation Notes
 
 """
 from struct import unpack_from
-import busio
 import adafruit_is31fl3741
 from . import IS31FL3741
+
+try:
+    # Used only for typing
+    from typing import Tuple  # pylint: disable=unused-import
+    import busio
+except ImportError:
+    pass
 
 
 class Right_Ring:
@@ -87,7 +93,7 @@ class Right_Ring:
     def __init__(self, is31_controller: IS31FL3741):
         self._is31 = is31_controller
 
-    def __setitem__(self, led: int, color: int):
+    def __setitem__(self, led: int, color: int) -> None:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
 
@@ -96,7 +102,7 @@ class Right_Ring:
         self._is31[rgb[1]] = (color >> 8) & 0xFF
         self._is31[rgb[2]] = color & 0xFF
 
-    def __getitem__(self, led: int):
+    def __getitem__(self, led: int) -> int:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
@@ -161,10 +167,10 @@ class Left_Ring:
         b"\x00\xF1\x00\xF0\x01\x5E"
     )
 
-    def __init__(self, is31_controller: IS31FL3741):
+    def __init__(self, is31_controller: IS31FL3741) -> None:
         self._is31 = is31_controller
 
-    def __setitem__(self, led: int, color: int):
+    def __setitem__(self, led: int, color: int) -> None:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
 
@@ -173,7 +179,7 @@ class Left_Ring:
         self._is31[rgb[1]] = (color >> 8) & 0xFF
         self._is31[rgb[2]] = color & 0xFF
 
-    def __getitem__(self, led: int):
+    def __getitem__(self, led: int) -> int:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
@@ -387,7 +393,7 @@ class LED_Glasses(IS31FL3741):
         self.grid = self
 
     @staticmethod
-    def pixel_addrs(x: int, y: int):
+    def pixel_addrs(x: int, y: int) -> Tuple[int, ...]:
         return unpack_from(
             ">HHH", LED_Glasses.ledmap_bytes, ((y * LED_Glasses.width) + x) * 6
         )

@@ -25,7 +25,8 @@ Implementation Notes
 
 # imports
 try:
-    from typing import Tuple
+    # Used only for typing
+    from typing import Tuple  # pylint: disable=unused-import
 except ImportError:
     pass
 from . import IS31FL3741
