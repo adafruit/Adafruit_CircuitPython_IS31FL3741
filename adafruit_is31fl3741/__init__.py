@@ -327,7 +327,8 @@ class IS31FL3741_colorXY(IS31FL3741):
         this isn't super robust yet or anything.
 
         :param img: Source image -- either a FrameBuffer object if running
-        CircuitPython, or PIL image if running CPython w/Python Imaging Lib.
+                    CircuitPython, or PIL image if running CPython w/Python
+                    Imaging Lib.
         """
         if implementation.name == "circuitpython":
             for y in range(self.height):
