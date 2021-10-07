@@ -86,6 +86,7 @@ class Right_Ring:
 
     def fill(self, color):
         """Sets all LEDs in a ring to the same color.
+
         :param color: Packed RGB color (0xRRGGBB).
         """
         red = (color >> 16) & 0xFF
@@ -154,6 +155,7 @@ class Left_Ring:
 
     def fill(self, color):
         """Sets all LEDs in a ring to the same color.
+
         :param color: Packed RGB color (0xRRGGBB).
         """
         red = (color >> 16) & 0xFF

@@ -52,10 +52,11 @@ MUST_BUFFER = 0x02  # MUST buffer pixel data, else throw MemoryError
 
 class IS31FL3741:
     """
-    The IS31FL3741 is an abstract class contain the main function related to
-    this chip. It focuses on lowest-level I2C operations and chip registers,
-    and has no concept of a 2D graphics coordinate system, nor of RGB colors
-    (subclasses provide these). It is linear and monochromatic.
+    The IS31FL3741 is an abstract class containing the main function related
+    to this chip. It focuses on lowest-level I2C operations and chip
+    registers, and has no concept of a 2D graphics coordinate system, nor of
+    RGB colors (subclasses provide these). It is linear and monochromatic.
+
     :param ~adafruit_bus_device.i2c_device i2c_device: the connected i2c bus
            i2c_device
     :param address: the device address; defaults to 0x30
@@ -105,6 +106,7 @@ class IS31FL3741:
 
     def set_led_scaling(self, scale):
         """Set scaling level for all LEDs.
+
         :param scale: Scaling level from 0 (off) to 255 (brightest).
         """
         scalebuf = bytearray([scale] * 181)  # 180 bytes + 1 for reg addr
@@ -235,6 +237,7 @@ class IS31FL3741_colorXY(IS31FL3741):
     could be separately implemented in the future if required for anything.
     Mostly though, this is about providing a place for common RGB matrix
     functions like fill() that then work across all such devices.
+
     :param ~adafruit_bus_device.i2c_device i2c_device: the connected i2c bus
            i2c_device
     :param width:    Matrix width in pixels.
@@ -278,6 +281,7 @@ class IS31FL3741_colorXY(IS31FL3741):
 
     def fill(self, color=None):
         """Set all pixels to a given RGB color.
+
         :param color: Packed 24-bit color value (0xRRGGBB).
         """
         red = (color >> 16) & 0xFF
@@ -293,6 +297,7 @@ class IS31FL3741_colorXY(IS31FL3741):
     def pixel(self, x, y, color=None):
         """
         Set or retrieve RGB color of pixel at position (X,Y).
+
         :param x:     Horizontal pixel position.
         :param y:     Vertical pixel position.
         :param color: If setting, a packed 24-bit color value (0xRRGGBB).
@@ -320,6 +325,7 @@ class IS31FL3741_colorXY(IS31FL3741):
         """Copy an in-memory image to the LED matrix. Image should be in
         24-bit format (e.g. "RGB888") and dimensions should match matrix,
         this isn't super robust yet or anything.
+
         :param img: Source image -- either a FrameBuffer object if running
         CircuitPython, or PIL image if running CPython w/Python Imaging Lib.
         """
