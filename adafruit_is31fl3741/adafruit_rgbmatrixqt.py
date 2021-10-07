@@ -24,6 +24,10 @@ Implementation Notes
 """
 
 # imports
+try:
+    from typing import Tuple
+except ImportError:
+    pass
 from . import IS31FL3741
 
 
@@ -34,7 +38,7 @@ class Adafruit_RGBMatrixQT(IS31FL3741):
     height = 9
 
     @staticmethod
-    def pixel_addrs(x: int, y: int):
+    def pixel_addrs(x: int, y: int) -> Tuple[int, int, int]:
         """Calulate the RGB offsets into the device array for x,y pixel"""
         col = x
         row = y
