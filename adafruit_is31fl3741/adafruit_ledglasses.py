@@ -23,6 +23,7 @@ Implementation Notes
 
 """
 from struct import unpack_from
+import busio
 import adafruit_is31fl3741
 from . import IS31FL3741
 
@@ -83,10 +84,10 @@ class Right_Ring:
         b"\x00\x3D\x00\x3C\x01\x28"
     )
 
-    def __init__(self, is31_controller):
+    def __init__(self, is31_controller: IS31FL3741):
         self._is31 = is31_controller
 
-    def __setitem__(self, led, color):
+    def __setitem__(self, led: int, color: int):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
 
@@ -95,7 +96,7 @@ class Right_Ring:
         self._is31[rgb[1]] = (color >> 8) & 0xFF
         self._is31[rgb[2]] = color & 0xFF
 
-    def __getitem__(self, led):
+    def __getitem__(self, led: int):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
@@ -160,10 +161,10 @@ class Left_Ring:
         b"\x00\xF1\x00\xF0\x01\x5E"
     )
 
-    def __init__(self, is31_controller):
+    def __init__(self, is31_controller: IS31FL3741):
         self._is31 = is31_controller
 
-    def __setitem__(self, led, color):
+    def __setitem__(self, led: int, color: int):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
 
@@ -172,7 +173,7 @@ class Left_Ring:
         self._is31[rgb[1]] = (color >> 8) & 0xFF
         self._is31[rgb[2]] = color & 0xFF
 
-    def __getitem__(self, led):
+    def __getitem__(self, led: int):
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         rgb = unpack_from(">HHH", self.ledmap_bytes, led * 6)
@@ -374,7 +375,7 @@ class LED_Glasses(IS31FL3741):
     width = 18
     height = 5
 
-    def __init__(self, i2c, allocate=adafruit_is31fl3741.NO_BUFFER):
+    def __init__(self, i2c: busio.I2C, allocate: int = adafruit_is31fl3741.NO_BUFFER):
         super().__init__(i2c, allocate=allocate)
 
         self.set_led_scaling(0xFF)  # turn on LEDs all the way
@@ -386,7 +387,7 @@ class LED_Glasses(IS31FL3741):
         self.grid = self
 
     @staticmethod
-    def pixel_addrs(x, y):
+    def pixel_addrs(x: int, y: int):
         return unpack_from(
             ">HHH", LED_Glasses.ledmap_bytes, ((y * LED_Glasses.width) + x) * 6
         )
