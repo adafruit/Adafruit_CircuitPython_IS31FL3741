@@ -28,13 +28,13 @@ from sys import implementation
 from adafruit_bus_device import i2c_device
 from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
-import busio
 
 try:
     # Used only for typing
     from typing import Optional, Tuple, Union  # pylint: disable=unused-import
     from PIL import Image
     from adafruit_framebuf import FrameBuffer
+    import busio
 except ImportError:
     pass
 
