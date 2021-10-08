@@ -27,27 +27,35 @@ Implementation Notes
 """
 
 # imports
-from . import IS31FL3741
+from adafruit_is31fl3741 import _IS3741_ADDR_DEFAULT, NO_BUFFER, IS3741_BGR
+from adafruit_is31fl3741 import IS31FL3741_colorXY
 
 try:
     # Used only for typing
     from typing import Tuple  # pylint: disable=unused-import
+    import busio
 except ImportError:
     pass
 
 
-class ISSI_EVB(IS31FL3741):
+class ISSI_EVB(IS31FL3741_colorXY):
     """Supports the ISSI IS31FL3741 eval board"""
 
-    width = 13
-    height = 9
+    def __init__(
+        self,
+        i2c: busio.I2C,
+        address: int = _IS3741_ADDR_DEFAULT,
+        allocate: int = NO_BUFFER,
+        order: int = IS3741_BGR,
+    ):
+        super().__init__(i2c, 9, 13, address=address, allocate=allocate, order=order)
 
     @staticmethod
     def pixel_addrs(x: int, y: int) -> Tuple[int, int, int]:
         """Calulate the RGB offsets into the device array for x,y pixel"""
-        if x > 9:
-            offset = (x + 80 + y * 3) * 3
+        if y > 2:
+            offset = (x * 10 + 12 - y) * 3
         else:
-            offset = (x + y * 10) * 3
+            offset = (92 + x * 3 - y) * 3
 
-        return (offset + 2, offset + 1, offset)
+        return (offset, offset + 1, offset + 2)

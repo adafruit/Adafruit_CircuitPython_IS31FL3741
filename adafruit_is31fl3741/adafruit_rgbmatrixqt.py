@@ -24,54 +24,42 @@ Implementation Notes
 """
 
 # imports
+from adafruit_is31fl3741 import _IS3741_ADDR_DEFAULT, NO_BUFFER, IS3741_BGR
+from . import IS31FL3741_colorXY
+
 try:
     # Used only for typing
-    from typing import Tuple  # pylint: disable=unused-import
+    from typing import Tuple
+    import busio
 except ImportError:
     pass
-from . import IS31FL3741
 
 
-class Adafruit_RGBMatrixQT(IS31FL3741):
-    """Supports the ISSI IS31FL3741 eval board"""
+class Adafruit_RGBMatrixQT(IS31FL3741_colorXY):
+    """Supports the Adafruit STEMMA QT IS31FL3741 RGB LED matrix."""
 
-    width = 13
-    height = 9
+    rowmap = [8, 5, 4, 3, 2, 1, 0, 7, 6]
+
+    def __init__(
+        self,
+        i2c: busio.I2C,
+        address: int = _IS3741_ADDR_DEFAULT,
+        allocate: int = NO_BUFFER,
+        order: int = IS3741_BGR,
+    ):
+        super().__init__(i2c, 13, 9, address=address, allocate=allocate, order=order)
 
     @staticmethod
     def pixel_addrs(x: int, y: int) -> Tuple[int, int, int]:
         """Calulate the RGB offsets into the device array for x,y pixel"""
-        col = x
-        row = y
+        y = Adafruit_RGBMatrixQT.rowmap[y]  # Reorder rows
 
-        # remap the row
-        rowmap = [8, 5, 4, 3, 2, 1, 0, 7, 6]
-        row = rowmap[y]
-
-        offset = 0
-
-        if row <= 5:
-            if col < 10:
-                offset = 0x1E * row + col * 3
-            else:
-                offset = 0xB4 + 0x5A + 9 * row + (col - 10) * 3
-        else:
-            if col < 10:
-                offset = 0xB4 + (row - 6) * 0x1E + col * 3
-            else:
-                offset = 0xB4 + 0x5A + 9 * row + (col - 10) * 3
+        offset = 3 * (x + (y * 10) if x < 10 else x + (80 + y * 3))
 
         # print(x, ",", y, "->", hex(offset))
-        r_off = 0
-        g_off = 1
-        b_off = 2
-        if col == 12 or col % 2 == 1:  # odds + last col
-            r_off = 2
-            g_off = 1
-            b_off = 0
+        if x & 1 or x == 12:  # odds + last col
+            r_off, g_off, b_off = 2, 0, 1
         else:  # evens
-            r_off = 0
-            g_off = 2
-            b_off = 1
+            r_off, g_off, b_off = 0, 1, 2
 
         return (offset + r_off, offset + g_off, offset + b_off)
