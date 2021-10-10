@@ -32,7 +32,7 @@ from adafruit_register.i2c_bit import RWBit
 try:
     # Used only for typing
     from typing import Optional, Tuple, Union  # pylint: disable=unused-import
-    from PIL import Image
+    from PIL.ImageFile import ImageFile
     from adafruit_framebuf import FrameBuffer
     import busio
 except ImportError:
@@ -335,7 +335,7 @@ class IS31FL3741_colorXY(IS31FL3741):
                 )
         return None
 
-    def image(self, img: Union[FrameBuffer, Image]) -> None:
+    def image(self, img: Union[FrameBuffer, ImageFile]) -> None:
         """Copy an in-memory image to the LED matrix. Image should be in
         24-bit format (e.g. "RGB888") and dimensions should match matrix,
         this isn't super robust yet or anything.
