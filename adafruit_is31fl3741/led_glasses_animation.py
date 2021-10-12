@@ -34,7 +34,7 @@ def _setup_pixels(grid, led_glasses, left, left_start, right, right_start):
     return sequence
 
 
-class LEDGlassesNeoPixel:
+class LED_Glasses_Animation:
     """
     Library that wraps the LED Glasses with neo-pixel like behaviour so that Adafruit LED Animation
     can work.
