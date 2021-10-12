@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: MIT
 
 import board
-from adafruit_is31fl3741.adafruit_ledglasses import LED_Glasses, MUST_BUFFER
-
 from adafruit_led_animation.animation.colorcycle import ColorCycle
 from adafruit_led_animation.animation.rainbowcomet import RainbowComet
 from adafruit_led_animation.animation.sparkle import Sparkle
 from adafruit_led_animation.color import PURPLE
 from adafruit_led_animation.sequence import AnimationSequence
+
+from adafruit_is31fl3741.adafruit_ledglasses import MUST_BUFFER, LED_Glasses
 from adafruit_is31fl3741.led_glasses_animation import LED_Glasses_Animation
 
 glasses = LED_Glasses(board.I2C(), allocate=MUST_BUFFER)
