@@ -349,3 +349,6 @@ class IS31FL3741_colorXY(IS31FL3741):
             for y in range(self.height):
                 for x in range(self.width):
                     self.pixel(x, y, pixels[(x, y)])
+
+    def __len__(self):
+        return self.width * self.height * 3
