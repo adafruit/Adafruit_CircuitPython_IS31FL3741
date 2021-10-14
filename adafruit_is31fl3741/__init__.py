@@ -29,6 +29,15 @@ from adafruit_bus_device import i2c_device
 from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
 
+try:
+    # Used only for typing
+    from typing import Optional, Tuple, Union  # pylint: disable=unused-import
+    from PIL.ImageFile import ImageFile
+    from adafruit_framebuf import FrameBuffer
+    import busio
+except ImportError:
+    pass
+
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3741.git"
 
@@ -77,7 +86,12 @@ class IS31FL3741:
     _shutdown_bit = RWBit(_IS3741_FUNCREG_CONFIG, 0)
     _pixel_buffer = None
 
-    def __init__(self, i2c, address=_IS3741_ADDR_DEFAULT, allocate=NO_BUFFER):
+    def __init__(
+        self,
+        i2c: busio.I2C,
+        address: int = _IS3741_ADDR_DEFAULT,
+        allocate: int = NO_BUFFER,
+    ):
         if allocate >= PREFER_BUFFER:
             try:
                 # Pixel buffer intentionally has an extra item at the start
@@ -95,16 +109,16 @@ class IS31FL3741:
         self._page = None
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset"""
         self.page = 4
         self._reset_reg = 0xAE
 
-    def unlock(self):
+    def unlock(self) -> None:
         """Unlock"""
         self._lock_reg = 0xC5
 
-    def set_led_scaling(self, scale):
+    def set_led_scaling(self, scale: int) -> None:
         """Set scaling level for all LEDs.
 
         :param scale: Scaling level from 0 (off) to 255 (brightest).
@@ -119,34 +133,34 @@ class IS31FL3741:
             i2c.write(scalebuf, end=172)  # 2nd page is smaller
 
     @property
-    def global_current(self):
+    def global_current(self) -> int:
         """Global current"""
         self.page = 4
         return self._gcurrent_reg
 
     @global_current.setter
-    def global_current(self, current):
+    def global_current(self, current: int) -> None:
         self.page = 4
         self._gcurrent_reg = current
 
     @property
-    def enable(self):
+    def enable(self) -> bool:
         """Enable"""
         self.page = 4
         return self._shutdown_bit
 
     @enable.setter
-    def enable(self, enable):
+    def enable(self, enable: bool) -> None:
         self.page = 4
         self._shutdown_bit = enable
 
     @property
-    def page(self):
+    def page(self) -> Union[int, None]:
         """Page"""
         return self._page
 
     @page.setter
-    def page(self, page_value):
+    def page(self, page_value: int) -> None:
         if page_value == self._page:
             return  # already set
         if page_value > 4:
@@ -155,7 +169,7 @@ class IS31FL3741:
         self.unlock()
         self._page_reg = page_value
 
-    def __getitem__(self, led):
+    def __getitem__(self, led: int) -> int:
         if not 0 <= led <= 350:
             raise ValueError("LED must be 0 ~ 350")
         if self._pixel_buffer:
@@ -173,7 +187,7 @@ class IS31FL3741:
             )
         return self._buf[1]
 
-    def __setitem__(self, led, pwm):
+    def __setitem__(self, led: int, pwm: int) -> None:
         if self._pixel_buffer:
             # Buffered version doesn't require range checks --
             # Python will throw its own IndexError/ValueError as needed.
@@ -195,7 +209,7 @@ class IS31FL3741:
         else:
             raise ValueError("LED must be 0 ~ 350")
 
-    def show(self):
+    def show(self) -> None:
         """Issue in-RAM pixel data to device. No effect if pixels are
         unbuffered.
         """
@@ -256,12 +270,12 @@ class IS31FL3741_colorXY(IS31FL3741):
     # pylint: disable-msg=too-many-arguments
     def __init__(
         self,
-        i2c,
-        width,
-        height,
-        address=_IS3741_ADDR_DEFAULT,
-        allocate=NO_BUFFER,
-        order=IS3741_BGR,
+        i2c: busio.I2C,
+        width: int,
+        height: int,
+        address: int = _IS3741_ADDR_DEFAULT,
+        allocate: int = NO_BUFFER,
+        order: int = IS3741_BGR,
     ):
         super().__init__(i2c, address=address, allocate=allocate)
         self.order = order
@@ -275,11 +289,11 @@ class IS31FL3741_colorXY(IS31FL3741):
 
     # This function must be replaced for each board
     @staticmethod
-    def pixel_addrs(x, y):
+    def pixel_addrs(x: int, y: int) -> Tuple[int, ...]:
         """Calculate a device-specific LED offset for an X,Y 2D pixel."""
         raise NotImplementedError("Supported in subclasses only")
 
-    def fill(self, color=None):
+    def fill(self, color: Optional[int] = None) -> None:
         """Set all pixels to a given RGB color.
 
         :param color: Packed 24-bit color value (0xRRGGBB).
@@ -294,7 +308,7 @@ class IS31FL3741_colorXY(IS31FL3741):
                 self[addrs[self.g_offset]] = green
                 self[addrs[self.b_offset]] = blue
 
-    def pixel(self, x, y, color=None):
+    def pixel(self, x: int, y: int, color: Optional[int] = None) -> Union[int, None]:
         """
         Set or retrieve RGB color of pixel at position (X,Y).
 
@@ -321,7 +335,7 @@ class IS31FL3741_colorXY(IS31FL3741):
                 )
         return None
 
-    def image(self, img):
+    def image(self, img: Union[FrameBuffer, ImageFile]) -> None:
         """Copy an in-memory image to the LED matrix. Image should be in
         24-bit format (e.g. "RGB888") and dimensions should match matrix,
         this isn't super robust yet or anything.

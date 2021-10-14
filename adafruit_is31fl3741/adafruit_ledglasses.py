@@ -29,6 +29,13 @@ from struct import unpack_from
 from adafruit_is31fl3741 import _IS3741_ADDR_DEFAULT, NO_BUFFER, IS3741_BGR
 from . import IS31FL3741_colorXY
 
+try:
+    # Used only for typing
+    from typing import Tuple, Any  # pylint: disable=unused-import
+    import busio
+except ImportError:
+    pass
+
 
 class Right_Ring:
     """The right eye ring of the LED glasses"""
@@ -60,13 +67,13 @@ class Right_Ring:
         b"\x01\x28\x00\x3C\x00\x3D"
     )
 
-    def __init__(self, is31_controller, order):
+    def __init__(self, is31_controller: IS31FL3741_colorXY, order: int):
         self._is31 = is31_controller
         self.r_offset = (order >> 4) & 3
         self.g_offset = (order >> 2) & 3
         self.b_offset = order & 3
 
-    def __setitem__(self, led, color):
+    def __setitem__(self, led: int, color: int) -> None:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         offset = unpack_from(">HHH", self.ledmap_bytes, led * 6)
@@ -74,7 +81,7 @@ class Right_Ring:
         self._is31[offset[self.g_offset]] = (color >> 8) & 0xFF
         self._is31[offset[self.b_offset]] = color & 0xFF
 
-    def __getitem__(self, led):
+    def __getitem__(self, led: int) -> int:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         offset = unpack_from(">HHH", self.ledmap_bytes, led * 6)
@@ -84,7 +91,7 @@ class Right_Ring:
             | self._is31[offset[self.b_offset]]
         )
 
-    def fill(self, color):
+    def fill(self, color: int) -> None:
         """Sets all LEDs in a ring to the same color.
 
         :param color: Packed RGB color (0xRRGGBB).
@@ -129,13 +136,13 @@ class Left_Ring:
         b"\x01\x5E\x00\xF0\x00\xF1"
     )
 
-    def __init__(self, is31_controller, order):
+    def __init__(self, is31_controller: IS31FL3741_colorXY, order: int):
         self._is31 = is31_controller
         self.r_offset = (order >> 4) & 3
         self.g_offset = (order >> 2) & 3
         self.b_offset = order & 3
 
-    def __setitem__(self, led, color):
+    def __setitem__(self, led: int, color: int) -> None:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         offset = unpack_from(">HHH", self.ledmap_bytes, led * 6)
@@ -143,7 +150,7 @@ class Left_Ring:
         self._is31[offset[self.g_offset]] = (color >> 8) & 0xFF
         self._is31[offset[self.b_offset]] = color & 0xFF
 
-    def __getitem__(self, led):
+    def __getitem__(self, led: int) -> int:
         if not 0 <= led <= 23:
             raise ValueError("led must be 0~23")
         offset = unpack_from(">HHH", self.ledmap_bytes, led * 6)
@@ -153,7 +160,7 @@ class Left_Ring:
             | self._is31[offset[self.b_offset]]
         )
 
-    def fill(self, color):
+    def fill(self, color: int) -> None:
         """Sets all LEDs in a ring to the same color.
 
         :param color: Packed RGB color (0xRRGGBB).
@@ -268,7 +275,11 @@ class LED_Glasses(IS31FL3741_colorXY):
     )
 
     def __init__(
-        self, i2c, address=_IS3741_ADDR_DEFAULT, allocate=NO_BUFFER, order=IS3741_BGR
+        self,
+        i2c: busio.I2C,
+        address: int = _IS3741_ADDR_DEFAULT,
+        allocate: int = NO_BUFFER,
+        order: int = IS3741_BGR,
     ):
         super().__init__(i2c, 18, 5, address=address, allocate=allocate, order=order)
 
@@ -281,5 +292,5 @@ class LED_Glasses(IS31FL3741_colorXY):
         self.grid = self
 
     @staticmethod
-    def pixel_addrs(x, y):
+    def pixel_addrs(x: int, y: int) -> Tuple[Any, ...]:
         return unpack_from(">HHH", LED_Glasses.ledmap_bytes, ((x * 5) + y) * 6)
