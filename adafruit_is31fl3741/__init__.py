@@ -308,7 +308,7 @@ class IS31FL3741_colorXY(IS31FL3741):
                 self[addrs[self.g_offset]] = green
                 self[addrs[self.b_offset]] = blue
 
-    def pixel(self, x: int, y: int, color: int = 0) -> Union[int, None]:
+    def pixel(self, x: int, y: int, color: Optional[int] = None) -> Union[int, None]:
         """
         Set or retrieve RGB color of pixel at position (X,Y).
 
