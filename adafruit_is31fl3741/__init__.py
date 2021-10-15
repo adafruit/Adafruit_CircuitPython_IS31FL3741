@@ -293,7 +293,7 @@ class IS31FL3741_colorXY(IS31FL3741):
         """Calculate a device-specific LED offset for an X,Y 2D pixel."""
         raise NotImplementedError("Supported in subclasses only")
 
-    def fill(self, color: Optional[int] = None) -> None:
+    def fill(self, color: int = 0) -> None:
         """Set all pixels to a given RGB color.
 
         :param color: Packed 24-bit color value (0xRRGGBB).
