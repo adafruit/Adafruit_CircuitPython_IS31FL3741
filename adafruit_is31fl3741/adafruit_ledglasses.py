@@ -27,6 +27,13 @@ from struct import unpack_from  # pylint: disable=no-name-in-module
 from adafruit_is31fl3741 import _IS3741_ADDR_DEFAULT, NO_BUFFER, IS3741_BGR, MUST_BUFFER
 from . import IS31FL3741_colorXY
 
+try:
+    # Used only for typing
+    from typing import Tuple, Any  # pylint: disable=unused-import
+    import busio
+except ImportError:
+    pass
+
 
 class BaseRing:
     """
@@ -35,21 +42,19 @@ class BaseRing:
 
     ledmap_bytes = b""
 
-    def __init__(self, is31_controller, order):
+    def __init__(self, is31_controller: IS31FL3741_colorXY, order: int):
         self._is31 = is31_controller
         self.r_offset = (order >> 4) & 3
         self.g_offset = (order >> 2) & 3
         self.b_offset = order & 3
 
-    def __setitem__(self, led, color):
-        if not 0 <= led <= 23:
-            raise ValueError("led must be 0~23")
+    def __setitem__(self, led: int, color: int) -> None:
         offset = self.pixel_addrs(led)
         self._is31[offset[self.r_offset]] = (color >> 16) & 0xFF
         self._is31[offset[self.g_offset]] = (color >> 8) & 0xFF
         self._is31[offset[self.b_offset]] = color & 0xFF
 
-    def __getitem__(self, led):
+    def __getitem__(self, led: int) -> int:
         offset = self.pixel_addrs(led)
         return (
             (self._is31[offset[self.r_offset]] << 16)
@@ -57,7 +62,7 @@ class BaseRing:
             | self._is31[offset[self.b_offset]]
         )
 
-    def fill(self, color):
+    def fill(self, color: int) -> None:
         """Sets all LEDs in a ring to the same color.
 
         :param color: Packed RGB color (0xRRGGBB).
@@ -242,7 +247,11 @@ class LED_Glasses(IS31FL3741_colorXY):
     )
 
     def __init__(
-        self, i2c, address=_IS3741_ADDR_DEFAULT, allocate=NO_BUFFER, order=IS3741_BGR
+        self,
+        i2c: busio.I2C,
+        address: int = _IS3741_ADDR_DEFAULT,
+        allocate: int = NO_BUFFER,
+        order: int = IS3741_BGR,
     ):
         super().__init__(i2c, 18, 5, address=address, allocate=allocate, order=order)
 
@@ -255,7 +264,7 @@ class LED_Glasses(IS31FL3741_colorXY):
         self.grid = self
 
     @staticmethod
-    def pixel_addrs(x, y):
+    def pixel_addrs(x: int, y: int) -> Tuple[Any, ...]:
         return unpack_from(">HHH", LED_Glasses.ledmap_bytes, ((x * 5) + y) * 6)
 
 
