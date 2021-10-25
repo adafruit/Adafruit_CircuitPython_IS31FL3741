@@ -68,6 +68,11 @@ Matrix:
         display.fill(127)
 
 
+Documentation
+=============
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/is31fl3741/en/latest/>`_.
+
 Contributing
 ============
 
