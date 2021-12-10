@@ -5,6 +5,8 @@
 # SPDX-FileCopyrightText: 2021 Mark Komus
 #
 # SPDX-License-Identifier: MIT
+#
+# Based on the Neopixel python library
 
 """
 `is31fl3741` - IS31FL3741 driver
@@ -50,7 +52,6 @@ RGBW = "RGBW"
 GRBW = "GRBW"
 """Green Red Blue White"""
 
-
 class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
     """
     A sequence of LEDs controlled by an IS31FL3741 driver.
@@ -65,21 +66,9 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
     :param bool auto_write: True if the neopixels should immediately change when set. If False,
       `show` must be called explicitly.
     :param str pixel_order: Set the pixel color channel order. GRBW is set by default.
+    :param bool init: True if the IS31FL3741 chip should be initialized.
 
-    Example for Circuit Playground Express:
-
-    .. code-block:: python
-
-        import neopixel
-        from board import *
-
-        RED = 0x100000 # (0x10, 0, 0) also works
-
-        pixels = neopixel.NeoPixel(NEOPIXEL, 10)
-        for i in range(len(pixels)):
-            pixels[i] = RED
-
-    .. py:method:: NeoPixel.show()
+    .. py:method:: IS31FL3741_PixelBuf.show()
 
         Shows the new colors on the pixels themselves if they haven't already
         been autowritten.
@@ -87,13 +76,13 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         The colors may or may not be showing after this function returns because
         it may be done asynchronously.
 
-    .. py:method:: NeoPixel.fill(color)
+    .. py:method:: IS31FL3741_PixelBuf.fill(color)
 
         Colors all pixels the given ***color***.
 
     .. py:attribute:: brightness
 
-        Overall brightness of the pixel (0 to 1.0)
+        Overall brightness of the pixels (0 to 1.0)
 
     """
     def __init__(
@@ -129,7 +118,7 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
             is31fl3741_init(i2c=self.i2c, addr=self.addr)
 
     def deinit(self) -> None:
-        """Blank out the NeoPixels and release the pin."""
+        """Blank out the LEDs."""
         self.fill(0)
         self.show()
 
