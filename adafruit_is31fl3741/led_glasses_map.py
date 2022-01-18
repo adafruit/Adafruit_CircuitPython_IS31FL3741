@@ -3,7 +3,7 @@
 
 # Maps to link IS31FL3741 LEDs to pixels
 
-# Full LED glasses
+# Full LED glasses 18 x 5 matrix
 glassesmatrix_ledmap = (
     65535, 65535, 65535, # (0,0) (clipped, corner)
     10,    8,     9,     # (0,1) / right ring pixel 20
@@ -97,7 +97,7 @@ glassesmatrix_ledmap = (
     276,   22,    277,   # (17,4) / 7
 )
 
-# LED glasses but excluding LEDs shared with the eye rings
+# LED glasses 18 x 5 matrix but excluding LEDs shared with the eye rings
 glassesmatrix_ledmap_no_ring = (
     65535, 65535, 65535, # (0,0) (clipped, corner)
     65535, 65535, 65535, # (0,1) / right ring pixel 20
@@ -219,7 +219,7 @@ left_ring_map = (
     350, 240, 241, # 23
 )
 
-# Left LED glasses eye ring excluding inner LEDs shared with the display
+# Left LED glasses eye ring excluding inner LEDs shared with the 18 x 5 matrix
 left_ring_map_no_inner = (
     341, 210, 211, # 0
     332, 180, 181, # 1
@@ -275,7 +275,7 @@ right_ring_map = (
     296, 60,  61,  # 23
 )
 
-# Right LED glasses eye ring excluding inner LEDs shared with the display
+# Right LED glasses eye ring excluding inner LEDs shared with the 18 x 5 matrix
 right_ring_map_no_inner = (
     287, 30,  31,  # 0
     278, 0,   1,   # 1

@@ -17,7 +17,11 @@
 
 # pylint: disable=ungrouped-imports
 import sys
-from is31fl3741 import is31fl3741_write, is31fl3741_init
+from is31fl3741 import is31fl3741_write
+from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
+from adafruit_register.i2c_bit import RWBit
+from adafruit_bus_device import i2c_device
+import time
 
 try:
     import adafruit_pixelbuf
@@ -52,6 +56,16 @@ RGBW = "RGBW"
 GRBW = "GRBW"
 """Green Red Blue White"""
 
+_IS3741_COMMANDREGISTER = 0xFD
+_IS3741_COMMANDREGISTERLOCK = 0xFE
+_IS3741_INTMASKREGISTER = 0xF0
+_IS3741_INTSTATUSREGISTER = 0xF1
+_IS3741_IDREGISTER = 0xFC
+
+_IS3741_FUNCREG_CONFIG = 0x00
+_IS3741_FUNCREG_GCURRENT = 0x01
+_IS3741_FUNCREG_RESET = 0x3F
+
 class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
     """
     A sequence of LEDs controlled by an IS31FL3741 driver.
@@ -85,6 +99,15 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         Overall brightness of the pixels (0 to 1.0)
 
     """
+
+    _page_reg = UnaryStruct(_IS3741_COMMANDREGISTER, "<B")
+    _lock_reg = UnaryStruct(_IS3741_COMMANDREGISTERLOCK, "<B")
+    _id_reg = UnaryStruct(_IS3741_IDREGISTER, "<B")
+    _config_reg = UnaryStruct(_IS3741_FUNCREG_CONFIG, "<B")
+    _gcurrent_reg = UnaryStruct(_IS3741_FUNCREG_GCURRENT, "<B")
+    _reset_reg = UnaryStruct(_IS3741_FUNCREG_RESET, "<B")
+    _shutdown_bit = RWBit(_IS3741_FUNCREG_CONFIG, 0)
+
     def __init__(
         self,
         i2c: busio.I2C,
@@ -109,13 +132,14 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         )
 
         self.i2c = i2c
+        self.i2c_device = i2c_device.I2CDevice(i2c, addr)
         self.addr = addr
         if type(mapping) is not tuple:
             raise AttributeError("Mapping must be a tuple")
         self.mapping = mapping
 
         if init is True:
-            is31fl3741_init(i2c=self.i2c, addr=self.addr)
+            self.initialize()
 
     def deinit(self) -> None:
         """Blank out the LEDs."""
@@ -135,6 +159,33 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
 
     def __repr__(self):
         return "[" + ", ".join([str(x) for x in self]) + "]"
+
+    def initialize(self) -> None:
+        """Initialize"""
+        self._lock_reg = 0xC5
+        self._page_reg = 4
+        self._reset_reg = 0xAE
+
+        # Set scaling for all LEDs to maximum
+        scalebuf = bytearray([0xFF] * 181)  # 180 bytes + 1 for reg addr
+        scalebuf[0] = 0  # Initial register address
+        self._lock_reg = 0xC5
+        self._page_reg = 2
+        with self.i2c_device as i2c:
+            i2c.write(scalebuf)
+
+        self._lock_reg = 0xC5
+        self._page_reg = 3
+        with self.i2c_device as i2c:
+            i2c.write(scalebuf, end=172)  # 2nd page is smaller
+
+        self._lock_reg = 0xC5
+        self._page_reg = 4
+        self._gcurrent_reg = 0xFE # Set global current to max
+
+        self._lock_reg = 0xC5
+        self._page_reg = 4
+        self._shutdown_bit = True # Enable driver chip
 
     @property
     def n(self) -> int:
