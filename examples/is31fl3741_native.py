@@ -7,10 +7,14 @@ import board
 import busio
 from adafruit_display_text import label
 from adafruit_bitmap_font import bitmap_font
-from adafruit_is31fl3741.is31fl3741_PixelBuf import IS31FL3741_PixelBuf
-from adafruit_is31fl3741.led_glasses_map import glassesmatrix_ledmap, glassesmatrix_ledmap_no_ring, left_ring_map_no_inner, right_ring_map_no_inner
 from adafruit_led_animation.animation.comet import Comet
 from adafruit_led_animation.animation.chase import Chase
+from adafruit_is31fl3741.is31fl3741_PixelBuf import IS31FL3741_PixelBuf
+from adafruit_is31fl3741.led_glasses_map import (
+    glassesmatrix_ledmap_no_ring,
+    left_ring_map_no_inner,
+    right_ring_map_no_inner,
+)
 
 # Release any existing displays
 displayio.release_displays()
@@ -19,24 +23,35 @@ displayio.release_displays()
 i2c = busio.I2C(board.SCL, board.SDA, frequency=1000000)
 
 # Initialize the IS31FL3741 displayio display
-is31 = is31fl3741.IS31FL3741(width=54, height=15, i2c=i2c, scale=True, gamma=True, mapping=glassesmatrix_ledmap_no_ring)
+is31 = is31fl3741.IS31FL3741(
+    width=54,
+    height=15,
+    i2c=i2c,
+    scale=True,
+    gamma=True,
+    mapping=glassesmatrix_ledmap_no_ring,
+)
 display = framebufferio.FramebufferDisplay(is31, auto_refresh=True)
 
 # Turn the brightness down
 is31.brightness = 0.1
 
 # Create pixel buffers for each eye. Init is False as the display setup initialized the chip
-eye_left = IS31FL3741_PixelBuf(i2c, left_ring_map_no_inner, 24, init=False, auto_write=False)
-eye_right = IS31FL3741_PixelBuf(i2c, right_ring_map_no_inner, 24, init=False, auto_write=False)
+eye_left = IS31FL3741_PixelBuf(
+    i2c, left_ring_map_no_inner, 24, init=False, auto_write=False
+)
+eye_right = IS31FL3741_PixelBuf(
+    i2c, right_ring_map_no_inner, 24, init=False, auto_write=False
+)
 
 # Create a different animation for each eye ring
-chase = Chase(eye_left, speed=0.05, color=(0,0,150), size=8, spacing=4)
-comet = Comet(eye_right, speed=0.01, color=(0,0,150), tail_length=10, bounce=False)
+chase = Chase(eye_left, speed=0.05, color=(0, 0, 150), size=8, spacing=4)
+comet = Comet(eye_right, speed=0.01, color=(0, 0, 150), tail_length=10, bounce=False)
 
 # Create text to scroll across the display
 font = bitmap_font.load_font("scrolly.bdf")
 text = "HELLO FROM CIRCUITPYTHON ON NATIVE DISPLAYIO"
-color = (255,210,0)
+color = (255, 210, 0)
 text_area = label.Label(font, text=text, color=color)
 
 # Set the text location

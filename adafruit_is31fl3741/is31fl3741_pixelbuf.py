@@ -16,12 +16,10 @@
 """
 
 # pylint: disable=ungrouped-imports
-import sys
 from is31fl3741 import is31fl3741_write
-from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
+from adafruit_register.i2c_struct import UnaryStruct
 from adafruit_register.i2c_bit import RWBit
 from adafruit_bus_device import i2c_device
-import time
 
 try:
     import adafruit_pixelbuf
@@ -36,12 +34,13 @@ try:
     # Used only for typing
     from typing import Optional, Type
     from types import TracebackType
+    import busio
 except ImportError:
     pass
 
 
 __version__ = "0.0.0-auto.0"
-#__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3741.git"
+# __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3741.git"
 
 
 # Pixel color order constants
@@ -66,13 +65,15 @@ _IS3741_FUNCREG_CONFIG = 0x00
 _IS3741_FUNCREG_GCURRENT = 0x01
 _IS3741_FUNCREG_RESET = 0x3F
 
+
 class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
     """
     A sequence of LEDs controlled by an IS31FL3741 driver.
 
     :param ~busio.I2C i2c: the I2C bus to output with
     :param ~int addr: the I2C address of the IS31FL3741 device
-    :param ~Tuple[int, ...] mapping: map the pixels in the buffer to the order addressed by the driver chip
+    :param ~Tuple[int, ...] mapping: map the pixels in the buffer to the order addressed
+        by the driver chip
     :param int n: The number of neopixels in the chain
     :param int bpp: Bytes per pixel. 3 for RGB and 4 for RGBW pixels.
     :param float brightness: Brightness of the pixels between 0.0 and 1.0 where 1.0 is full
@@ -134,7 +135,7 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         self.i2c = i2c
         self.i2c_device = i2c_device.I2CDevice(i2c, addr)
         self.addr = addr
-        if type(mapping) is not tuple:
+        if not isinstance(mapping, tuple):
             raise AttributeError("Mapping must be a tuple")
         self.mapping = mapping
 
@@ -181,11 +182,11 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
 
         self._lock_reg = 0xC5
         self._page_reg = 4
-        self._gcurrent_reg = 0xFE # Set global current to max
+        self._gcurrent_reg = 0xFE  # Set global current to max
 
         self._lock_reg = 0xC5
         self._page_reg = 4
-        self._shutdown_bit = True # Enable driver chip
+        self._shutdown_bit = True  # Enable driver chip
 
     @property
     def n(self) -> int:
@@ -201,4 +202,6 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         self.show()
 
     def _transmit(self, buffer: bytearray) -> None:
-        is31fl3741_write(i2c=self.i2c, addr=self.addr, mapping=self.mapping, buffer=buffer)
+        is31fl3741_write(
+            i2c=self.i2c, addr=self.addr, mapping=self.mapping, buffer=buffer
+        )
