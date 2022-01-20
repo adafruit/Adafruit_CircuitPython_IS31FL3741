@@ -38,10 +38,10 @@ is31.brightness = 0.1
 
 # Create pixel buffers for each eye. Init is False as the display setup initialized the chip
 eye_left = IS31FL3741_PixelBuf(
-    i2c, left_ring_map_no_inner, 24, init=False, auto_write=False
+    i2c, left_ring_map_no_inner, init=False, auto_write=False
 )
 eye_right = IS31FL3741_PixelBuf(
-    i2c, right_ring_map_no_inner, 24, init=False, auto_write=False
+    i2c, right_ring_map_no_inner, init=False, auto_write=False
 )
 
 # Create a different animation for each eye ring

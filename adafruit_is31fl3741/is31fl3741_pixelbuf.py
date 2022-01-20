@@ -74,7 +74,6 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
     :param ~int addr: the I2C address of the IS31FL3741 device
     :param ~Tuple[int, ...] mapping: map the pixels in the buffer to the order addressed
         by the driver chip
-    :param int n: The number of neopixels in the chain
     :param int bpp: Bytes per pixel. 3 for RGB and 4 for RGBW pixels.
     :param float brightness: Brightness of the pixels between 0.0 and 1.0 where 1.0 is full
       brightness
@@ -113,7 +112,6 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         self,
         i2c: busio.I2C,
         mapping: tuple,
-        n: int,
         *,
         addr: int = 0x30,
         bpp: int = 3,
@@ -127,6 +125,8 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         elif isinstance(pixel_order, tuple):
             order_list = [RGBW[order] for order in pixel_order]
             pixel_order = "".join(order_list)
+
+        n = int(len(mapping) / 3)
 
         super().__init__(
             n, brightness=brightness, byteorder=pixel_order, auto_write=auto_write
