@@ -9,18 +9,13 @@
 # Based on the Neopixel python library
 
 """
-`is31fl3741` - IS31FL3741 driver
+`is31fl3741_pixelbuf` - IS31FL3741 PixelBuf driver
 ====================================================
 
 * Author(s): Mark Komus, Damien P. George, Scott Shawcroft, Carter Nelson, Rose Hooper
 """
 
 # pylint: disable=ungrouped-imports
-from is31fl3741 import is31fl3741_write
-from adafruit_register.i2c_struct import UnaryStruct
-from adafruit_register.i2c_bit import RWBit
-from adafruit_bus_device import i2c_device
-
 try:
     import adafruit_pixelbuf
 except ImportError:
@@ -34,7 +29,7 @@ try:
     # Used only for typing
     from typing import Optional, Type
     from types import TracebackType
-    import busio
+    import is31fl3741
 except ImportError:
     pass
 
@@ -55,23 +50,12 @@ RGBW = "RGBW"
 GRBW = "GRBW"
 """Green Red Blue White"""
 
-_IS3741_COMMANDREGISTER = 0xFD
-_IS3741_COMMANDREGISTERLOCK = 0xFE
-_IS3741_INTMASKREGISTER = 0xF0
-_IS3741_INTSTATUSREGISTER = 0xF1
-_IS3741_IDREGISTER = 0xFC
-
-_IS3741_FUNCREG_CONFIG = 0x00
-_IS3741_FUNCREG_GCURRENT = 0x01
-_IS3741_FUNCREG_RESET = 0x3F
-
 
 class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
     """
     A sequence of LEDs controlled by an IS31FL3741 driver.
 
-    :param ~busio.I2C i2c: the I2C bus to output with
-    :param ~int addr: the I2C address of the IS31FL3741 device
+    :param ~is31fl3741.IS31FL3741 is31: the IS31FL3741 device to output with
     :param ~Tuple[int, ...] mapping: map the pixels in the buffer to the order addressed
         by the driver chip
     :param int bpp: Bytes per pixel. 3 for RGB and 4 for RGBW pixels.
@@ -100,17 +84,9 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
 
     """
 
-    _page_reg = UnaryStruct(_IS3741_COMMANDREGISTER, "<B")
-    _lock_reg = UnaryStruct(_IS3741_COMMANDREGISTERLOCK, "<B")
-    _id_reg = UnaryStruct(_IS3741_IDREGISTER, "<B")
-    _config_reg = UnaryStruct(_IS3741_FUNCREG_CONFIG, "<B")
-    _gcurrent_reg = UnaryStruct(_IS3741_FUNCREG_GCURRENT, "<B")
-    _reset_reg = UnaryStruct(_IS3741_FUNCREG_RESET, "<B")
-    _shutdown_bit = RWBit(_IS3741_FUNCREG_CONFIG, 0)
-
     def __init__(
         self,
-        i2c: busio.I2C,
+        is31: is31fl3741.IS31FL3741,
         mapping: tuple,
         *,
         addr: int = 0x30,
@@ -132,8 +108,7 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
             n, brightness=brightness, byteorder=pixel_order, auto_write=auto_write
         )
 
-        self.i2c = i2c
-        self.i2c_device = i2c_device.I2CDevice(i2c, addr)
+        self.is31fl3741 = is31
         self.addr = addr
         if not isinstance(mapping, tuple):
             raise AttributeError("Mapping must be a tuple")
@@ -163,30 +138,14 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
 
     def initialize(self) -> None:
         """Initialize"""
-        self._lock_reg = 0xC5
-        self._page_reg = 4
-        self._reset_reg = 0xAE
+        self.is31fl3741.reset()
 
         # Set scaling for all LEDs to maximum
-        scalebuf = bytearray([0xFF] * 181)  # 180 bytes + 1 for reg addr
-        scalebuf[0] = 0  # Initial register address
-        self._lock_reg = 0xC5
-        self._page_reg = 2
-        with self.i2c_device as i2c:
-            i2c.write(scalebuf)
+        for led in range(352):
+            self.is31fl3741.set_led(led, 0xFF, 2)
 
-        self._lock_reg = 0xC5
-        self._page_reg = 3
-        with self.i2c_device as i2c:
-            i2c.write(scalebuf, end=172)  # 2nd page is smaller
-
-        self._lock_reg = 0xC5
-        self._page_reg = 4
-        self._gcurrent_reg = 0xFE  # Set global current to max
-
-        self._lock_reg = 0xC5
-        self._page_reg = 4
-        self._shutdown_bit = True  # Enable driver chip
+        self.is31fl3741.set_global_current(0xFE)
+        self.is31fl3741.enable()
 
     @property
     def n(self) -> int:
@@ -202,6 +161,4 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         self.show()
 
     def _transmit(self, buffer: bytearray) -> None:
-        is31fl3741_write(
-            i2c=self.i2c, addr=self.addr, mapping=self.mapping, buffer=buffer
-        )
+        self.is31fl3741.write(self.mapping, buffer)

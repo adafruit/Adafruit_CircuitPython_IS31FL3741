@@ -22,26 +22,29 @@ displayio.release_displays()
 # Create our own I2C bus with a 1Mhz frequency for faster updates
 i2c = busio.I2C(board.SCL, board.SDA, frequency=1000000)
 
+# Initalize the IS31FL3741
+is31 = is31fl3741.IS31FL3741(i2c=i2c)
+
 # Initialize the IS31FL3741 displayio display
-is31 = is31fl3741.IS31FL3741(
+is31_fb = is31fl3741.IS31FL3741_FrameBuffer(
     width=54,
     height=15,
-    i2c=i2c,
+    is31=is31,
     scale=True,
     gamma=True,
     mapping=glassesmatrix_ledmap_no_ring,
 )
-display = framebufferio.FramebufferDisplay(is31, auto_refresh=True)
+display = framebufferio.FramebufferDisplay(is31_fb, auto_refresh=True)
 
 # Turn the brightness down
-is31.brightness = 0.1
+is31_fb.brightness = 0.1
 
 # Create pixel buffers for each eye. Init is False as the display setup initialized the chip
 eye_left = IS31FL3741_PixelBuf(
-    i2c, left_ring_map_no_inner, init=False, auto_write=False
+    is31, left_ring_map_no_inner, init=False, auto_write=False
 )
 eye_right = IS31FL3741_PixelBuf(
-    i2c, right_ring_map_no_inner, init=False, auto_write=False
+    is31, right_ring_map_no_inner, init=False, auto_write=False
 )
 
 # Create a different animation for each eye ring
