@@ -5,4 +5,5 @@
 Adafruit-Blinka
 adafruit-circuitpython-framebuf
 adafruit-circuitpython-register
+adafruit-circuitpython-busdevice
 Pillow
