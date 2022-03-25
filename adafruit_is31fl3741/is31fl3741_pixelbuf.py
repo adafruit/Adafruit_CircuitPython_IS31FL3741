@@ -15,15 +15,7 @@
 * Author(s): Mark Komus, Damien P. George, Scott Shawcroft, Carter Nelson, Rose Hooper
 """
 
-# pylint: disable=ungrouped-imports
-try:
-    import adafruit_pixelbuf
-except ImportError:
-    try:
-        import _pixelbuf as adafruit_pixelbuf
-    except ImportError:
-        import adafruit_pypixelbuf as adafruit_pixelbuf
-
+import adafruit_pixelbuf
 
 try:
     # Used only for typing
