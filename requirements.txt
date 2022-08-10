@@ -5,5 +5,5 @@
 Adafruit-Blinka
 adafruit-circuitpython-framebuf
 adafruit-circuitpython-busdevice
-pillow
+adafruit-circuitpython-typing~=1.6
 adafruit-circuitpython-register
