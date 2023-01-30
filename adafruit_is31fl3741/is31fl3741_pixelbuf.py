@@ -19,9 +19,10 @@ import adafruit_pixelbuf
 
 try:
     # Used only for typing
-    from typing import Optional, Type
+    from typing import Optional, Type, Union
     from types import TracebackType
     import is31fl3741
+    from . import IS31FL3741
 except ImportError:
     pass
 
@@ -78,7 +79,7 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
 
     def __init__(
         self,
-        is31: is31fl3741.IS31FL3741,
+        is31: Union[is31fl3741.IS31FL3741, IS31FL3741],
         mapping: tuple,
         *,
         addr: int = 0x30,

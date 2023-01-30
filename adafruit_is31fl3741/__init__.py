@@ -33,6 +33,7 @@ try:
     # Used only for typing
     from typing import Optional, Tuple, Union  # pylint: disable=unused-import
     from circuitpython_typing.pil import Image
+    from circuitpython_typing import ReadableBuffer
     from adafruit_framebuf import FrameBuffer
     import busio
 except ImportError:
@@ -232,6 +233,18 @@ class IS31FL3741:
                 self._pixel_buffer[180] = 0
                 i2c.write(self._pixel_buffer, start=180, end=352)
                 self._pixel_buffer[180] = save
+
+    def write(self, mapping: Tuple, buffer: ReadableBuffer) -> None:
+        """
+        Write buf out on the I2C bus to the IS31FL3741.
+
+        :param mapping: map the pixels in the buffer to the order addressed by the driver chip
+        :param buffer: The bytes to clock out. No assumption is made about color order
+        :return: None
+        """
+        for pos, data in enumerate(buffer):
+            self[mapping[pos]] = data
+        self.show()
 
 
 IS3741_RGB = (0 << 4) | (1 << 2) | (2)  # Encode as R,G,B
