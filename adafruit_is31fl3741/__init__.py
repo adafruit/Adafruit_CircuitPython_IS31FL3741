@@ -243,7 +243,8 @@ class IS31FL3741:
         :return: None
         """
         for pos, data in enumerate(buffer):
-            self[mapping[pos]] = data
+            if mapping[pos] != 65535:
+                self[mapping[pos]] = data
         self.show()
 
 
