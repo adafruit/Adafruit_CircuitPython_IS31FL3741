@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2021 Mark Komus
 # SPDX-License-Identifier: MIT
+# Currently example only compatible with Adafruit LED Glasses Driver nRF52840
 import is31fl3741
 import displayio
 import framebufferio
