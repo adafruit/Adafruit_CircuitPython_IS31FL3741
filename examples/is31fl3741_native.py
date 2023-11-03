@@ -66,7 +66,7 @@ text_area.y = 8
 # Add the text label to the display
 group = displayio.Group()
 group.append(text_area)
-display.show(group)
+display.root_group = group
 
 # Scroll the text and update the animations
 x = display.width
