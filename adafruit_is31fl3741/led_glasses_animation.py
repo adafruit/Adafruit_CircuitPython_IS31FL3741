@@ -3,6 +3,7 @@
 """
 LED Animation compatibility layer.
 """
+
 import array
 
 
@@ -13,7 +14,6 @@ def _int_as_tuple(value):
 
 
 def _setup_pixels(grid, led_glasses, left, left_start, right, right_start):
-    # pylint: disable=too-many-locals, too-many-arguments
     left_right_size = 24
     order = [
         (left, "l", led_glasses.left_ring),
@@ -54,16 +54,13 @@ class LED_Glasses_Animation:
         left_start=21,
         right_start=8,
     ):
-        # pylint: disable=too-many-arguments
         self._glasses = led_glasses
 
         # improvements:
         # Over, Under, Overlap, Not.
         # Left Start, Right Start, Grid Order
 
-        sequence = _setup_pixels(
-            grid, led_glasses, left, left_start, right, right_start
-        )
+        sequence = _setup_pixels(grid, led_glasses, left, left_start, right, right_start)
 
         self.brightness = brightness
         self.auto_write = auto_write
@@ -105,9 +102,7 @@ class LED_Glasses_Animation:
         if isinstance(key, slice):
             for idx, val in zip(self._range_for_slice(key), value):
                 r, g, b = self._map_pixel(idx)
-                self._glasses[r], self._glasses[g], self._glasses[b] = _int_as_tuple(
-                    val
-                )
+                self._glasses[r], self._glasses[g], self._glasses[b] = _int_as_tuple(val)
                 return
         r, g, b = self._map_pixel(key)
         self._glasses[r], self._glasses[g], self._glasses[b] = _int_as_tuple(value)

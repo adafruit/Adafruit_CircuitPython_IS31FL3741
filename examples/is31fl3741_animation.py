@@ -23,8 +23,6 @@ pixels = LED_Glasses_Animation(glasses)
 anim1 = RainbowComet(pixels, 0.05, tail_length=24, ring=True)
 anim2 = Sparkle(pixels, 0.05, PURPLE)
 anim3 = ColorCycle(pixels, 0.03)
-group = AnimationSequence(
-    anim1, anim2, anim3, advance_interval=4, auto_reset=True, auto_clear=True
-)
+group = AnimationSequence(anim1, anim2, anim3, advance_interval=4, auto_reset=True, auto_clear=True)
 while True:
     group.animate()

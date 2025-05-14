@@ -5,22 +5,24 @@
 This example repeatedly displays all available animations
 on the IS31FL3741 13x9 RGB Matrix, at a five second interval.
 """
+
 import board
 from adafruit_led_animation.animation.blink import Blink
-from adafruit_led_animation.animation.sparklepulse import SparklePulse
-from adafruit_led_animation.animation.comet import Comet
 from adafruit_led_animation.animation.chase import Chase
-from adafruit_led_animation.animation.pulse import Pulse
-from adafruit_led_animation.animation.sparkle import Sparkle
-from adafruit_led_animation.animation.rainbowchase import RainbowChase
-from adafruit_led_animation.animation.rainbowsparkle import RainbowSparkle
-from adafruit_led_animation.animation.rainbowcomet import RainbowComet
-from adafruit_led_animation.animation.solid import Solid
 from adafruit_led_animation.animation.colorcycle import ColorCycle
-from adafruit_led_animation.animation.rainbow import Rainbow
+from adafruit_led_animation.animation.comet import Comet
 from adafruit_led_animation.animation.customcolorchase import CustomColorChase
+from adafruit_led_animation.animation.pulse import Pulse
+from adafruit_led_animation.animation.rainbow import Rainbow
+from adafruit_led_animation.animation.rainbowchase import RainbowChase
+from adafruit_led_animation.animation.rainbowcomet import RainbowComet
+from adafruit_led_animation.animation.rainbowsparkle import RainbowSparkle
+from adafruit_led_animation.animation.solid import Solid
+from adafruit_led_animation.animation.sparkle import Sparkle
+from adafruit_led_animation.animation.sparklepulse import SparklePulse
+from adafruit_led_animation.color import AMBER, JADE, MAGENTA, ORANGE, PURPLE, WHITE
 from adafruit_led_animation.sequence import AnimationSequence
-from adafruit_led_animation.color import PURPLE, WHITE, AMBER, JADE, MAGENTA, ORANGE
+
 from adafruit_is31fl3741 import PREFER_BUFFER
 from adafruit_is31fl3741.adafruit_rgbmatrixqt import Adafruit_RGBMatrixQT
 from adafruit_is31fl3741.is31fl3741_pixelbuf import IS31FL3741_PixelBuf
@@ -44,12 +46,10 @@ is31.enable = True
 WIDTH = 13
 HEIGHT = 9
 LEDS_MAP = tuple(
-    (
-        address
-        for y in range(HEIGHT)
-        for x in range(WIDTH)
-        for address in Adafruit_RGBMatrixQT.pixel_addrs(x, y)
-    )
+    address
+    for y in range(HEIGHT)
+    for x in range(WIDTH)
+    for address in Adafruit_RGBMatrixQT.pixel_addrs(x, y)
 )
 pixels = IS31FL3741_PixelBuf(is31, LEDS_MAP, init=False, auto_write=False)
 
