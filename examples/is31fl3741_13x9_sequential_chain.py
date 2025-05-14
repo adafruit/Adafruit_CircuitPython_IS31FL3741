@@ -3,8 +3,9 @@
 # Chaining 4 13x9 Matrix's to run sequentially (not simultaneously)
 
 import board
-from adafruit_led_animation.sequence import AnimationSequence
 from adafruit_led_animation.animation.rainbowchase import RainbowChase
+from adafruit_led_animation.sequence import AnimationSequence
+
 from adafruit_is31fl3741 import PREFER_BUFFER
 from adafruit_is31fl3741.adafruit_rgbmatrixqt import Adafruit_RGBMatrixQT
 from adafruit_is31fl3741.is31fl3741_pixelbuf import IS31FL3741_PixelBuf
@@ -38,12 +39,10 @@ Matrix33.enable = True
 WIDTH = 13
 HEIGHT = 9
 LEDS_MAP = tuple(
-    (
-        address
-        for y in range(HEIGHT)
-        for x in range(WIDTH)
-        for address in Adafruit_RGBMatrixQT.pixel_addrs(x, y)
-    )
+    address
+    for y in range(HEIGHT)
+    for x in range(WIDTH)
+    for address in Adafruit_RGBMatrixQT.pixel_addrs(x, y)
 )
 Matrix30_pixels = IS31FL3741_PixelBuf(Matrix30, LEDS_MAP, init=False, auto_write=False)
 Matrix30_chase = RainbowChase(Matrix30_pixels, speed=0.1, size=1, spacing=3, step=8)

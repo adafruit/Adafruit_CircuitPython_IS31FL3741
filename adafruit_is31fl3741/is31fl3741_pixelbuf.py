@@ -19,9 +19,11 @@ import adafruit_pixelbuf
 
 try:
     # Used only for typing
-    from typing import Optional, Type, Union
     from types import TracebackType
+    from typing import Optional, Type, Union
+
     import is31fl3741
+
     from . import IS31FL3741
 except ImportError:
     pass
@@ -87,7 +89,7 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
         brightness: float = 1.0,
         auto_write: bool = True,
         pixel_order: str = None,
-        init: bool = True
+        init: bool = True,
     ):
         if not pixel_order:
             pixel_order = BGR if bpp == 3 else GRBW
@@ -97,9 +99,7 @@ class IS31FL3741_PixelBuf(adafruit_pixelbuf.PixelBuf):
 
         n = int(len(mapping) / 3)
 
-        super().__init__(
-            n, brightness=brightness, byteorder=pixel_order, auto_write=auto_write
-        )
+        super().__init__(n, brightness=brightness, byteorder=pixel_order, auto_write=auto_write)
 
         self.is31fl3741 = is31
         self.addr = addr

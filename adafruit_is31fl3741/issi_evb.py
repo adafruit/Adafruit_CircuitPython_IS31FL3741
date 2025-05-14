@@ -27,12 +27,12 @@ Implementation Notes
 """
 
 # imports
-from adafruit_is31fl3741 import _IS3741_ADDR_DEFAULT, NO_BUFFER, IS3741_BGR
-from adafruit_is31fl3741 import IS31FL3741_colorXY
+from adafruit_is31fl3741 import _IS3741_ADDR_DEFAULT, IS3741_BGR, NO_BUFFER, IS31FL3741_colorXY
 
 try:
     # Used only for typing
-    from typing import Tuple  # pylint: disable=unused-import
+    from typing import Tuple
+
     import busio
 except ImportError:
     pass

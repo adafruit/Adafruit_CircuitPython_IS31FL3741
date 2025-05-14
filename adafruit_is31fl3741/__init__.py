@@ -25,17 +25,19 @@ Implementation Notes
 """
 
 from sys import implementation
+
 from adafruit_bus_device import i2c_device
-from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 from adafruit_register.i2c_bit import RWBit
+from adafruit_register.i2c_struct import ROUnaryStruct, UnaryStruct
 
 try:
     # Used only for typing
-    from typing import Optional, Tuple, Union  # pylint: disable=unused-import
-    from circuitpython_typing.pil import Image
-    from circuitpython_typing import ReadableBuffer
-    from adafruit_framebuf import FrameBuffer
+    from typing import Optional, Tuple, Union
+
     import busio
+    from adafruit_framebuf import FrameBuffer
+    from circuitpython_typing import ReadableBuffer
+    from circuitpython_typing.pil import Image
 except ImportError:
     pass
 
@@ -281,7 +283,6 @@ class IS31FL3741_colorXY(IS31FL3741):
                      above. Default is IS3741_BGR.
     """
 
-    # pylint: disable-msg=too-many-arguments
     def __init__(
         self,
         i2c: busio.I2C,
@@ -367,9 +368,7 @@ class IS31FL3741_colorXY(IS31FL3741):
                 raise ValueError("Image must be in mode RGB.")
             if img.size[0] != self.width or img.size[1] != self.height:
                 raise ValueError(
-                    "Image must be same dimensions as display ({0}x{1}).".format(
-                        self.width, self.height
-                    )
+                    f"Image must be same dimensions as display ({self.width}x{self.height})."
                 )
 
             # Iterate X/Y through all image pixels

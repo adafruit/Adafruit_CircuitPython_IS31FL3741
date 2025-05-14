@@ -1,15 +1,16 @@
 # SPDX-FileCopyrightText: 2021 Mark Komus
 # SPDX-License-Identifier: MIT
 # Currently example only compatible with Adafruit LED Glasses Driver nRF52840
-import is31fl3741
-import displayio
-import framebufferio
 import board
 import busio
-from adafruit_display_text import label
+import displayio
+import framebufferio
+import is31fl3741
 from adafruit_bitmap_font import bitmap_font
-from adafruit_led_animation.animation.comet import Comet
+from adafruit_display_text import label
 from adafruit_led_animation.animation.chase import Chase
+from adafruit_led_animation.animation.comet import Comet
+
 from adafruit_is31fl3741.is31fl3741_PixelBuf import IS31FL3741_PixelBuf
 from adafruit_is31fl3741.led_glasses_map import (
     glassesmatrix_ledmap_no_ring,
@@ -41,12 +42,8 @@ display = framebufferio.FramebufferDisplay(is31_fb, auto_refresh=True)
 is31_fb.brightness = 0.1
 
 # Create pixel buffers for each eye. Init is False as the display setup initialized the chip
-eye_left = IS31FL3741_PixelBuf(
-    is31, left_ring_map_no_inner, init=False, auto_write=False
-)
-eye_right = IS31FL3741_PixelBuf(
-    is31, right_ring_map_no_inner, init=False, auto_write=False
-)
+eye_left = IS31FL3741_PixelBuf(is31, left_ring_map_no_inner, init=False, auto_write=False)
+eye_right = IS31FL3741_PixelBuf(is31, right_ring_map_no_inner, init=False, auto_write=False)
 
 # Create a different animation for each eye ring
 chase = Chase(eye_left, speed=0.05, color=(0, 0, 150), size=8, spacing=4)
