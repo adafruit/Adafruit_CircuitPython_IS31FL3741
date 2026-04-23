@@ -8,10 +8,10 @@ import framebufferio
 import is31fl3741
 from adafruit_bitmap_font import bitmap_font
 from adafruit_display_text import label
+from adafruit_is31fl3741.is31fl3741_PixelBuf import IS31FL3741_PixelBuf
 from adafruit_led_animation.animation.chase import Chase
 from adafruit_led_animation.animation.comet import Comet
 
-from adafruit_is31fl3741.is31fl3741_PixelBuf import IS31FL3741_PixelBuf
 from adafruit_is31fl3741.led_glasses_map import (
     glassesmatrix_ledmap_no_ring,
     left_ring_map_no_inner,
@@ -68,7 +68,7 @@ display.root_group = group
 # Scroll the text and update the animations
 x = display.width
 while True:
-    x = x - 1
+    x -= 1
     text_area.x = x
     if x == -text_width:
         x = display.width
